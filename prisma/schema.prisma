@@ -1,0 +1,523 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  phone         String?
+  role          String    @default("GUARDIAN") // GUARDIAN, CAREGIVER, ADMIN
+  profileImage  String?
+  isActive      Boolean   @default(true)
+  isBanned      Boolean   @default(false)
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  guardianProfile  GuardianProfile?
+  caregiverProfile CaregiverProfile?
+  notifications    Notification[]
+  sentMessages     InterviewMessage[]
+  bookmarks        Bookmark[]
+
+  @@index([email])
+  @@index([role])
+}
+
+// ─── Guardian (보호자) ───
+
+model GuardianProfile {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  region       String  @default("")
+  address      String?
+  introduction String?
+  relationship String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  careRecipients    CareRecipient[]
+  matchesAsGuardian Match[]            @relation("MatchGuardian")
+  reviewsWritten    Review[]           @relation("ReviewAuthor")
+  coGuardians       CoGuardian[]       @relation("CoGuardianOwner")
+  coGuardianAccess  CoGuardian[]       @relation("CoGuardianMember")
+
+  @@index([region])
+}
+
+model CoGuardian {
+  id          String          @id @default(cuid())
+  ownerId     String
+  owner       GuardianProfile @relation("CoGuardianOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  memberId    String
+  member      GuardianProfile @relation("CoGuardianMember", fields: [memberId], references: [id], onDelete: Cascade)
+  permission  String          @default("READ") // READ, WRITE
+  inviteEmail String?
+  status      String          @default("PENDING") // PENDING, ACCEPTED, REJECTED
+
+  createdAt DateTime @default(now())
+
+  @@unique([ownerId, memberId])
+  @@index([ownerId])
+  @@index([memberId])
+}
+
+// ─── Caregiver (요양보호사) ───
+
+model CaregiverProfile {
+  id                String  @id @default(cuid())
+  userId            String  @unique
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gender            String
+  birthDate         DateTime?
+  region            String  @default("")
+  address           String?
+  introduction      String?
+  experience        String?
+  experienceYears   Int     @default(0)
+  education         String?
+  hourlyRate        Int     @default(15000)
+  additionalRate    Int     @default(0)
+  caregiverType     String  @default("CARE_WORKER")
+  serviceCategories String  @default("[]")
+  specialties       String  @default("[]")
+  maxRecipients     Int     @default(1)
+  canDrive          Boolean @default(false)
+  nonsmoker         Boolean @default(true)
+  licenseNumber     String?
+  licenseVerified   Boolean @default(false)
+  idVerified        Boolean @default(false)
+  backgroundCheck   String  @default("PENDING")
+  averageRating     Float   @default(0)
+  totalReviews      Int     @default(0)
+  totalCares        Int     @default(0)
+  responseRate      Float   @default(0)
+  // Grade system (등급 시스템)
+  grade             String  @default("NEWBIE") // NEWBIE, GENERAL, SKILLED, EXPERT, MASTER
+  gradePoints       Int     @default(0)
+  videoIntroUrl     String?
+  profileCompleteness Int   @default(0) // 0-100%
+  // Certification workflow (7단계 인증)
+  certStep          Int     @default(0) // 0-7 현재 완료 단계
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  availabilities     Availability[]
+  certificates       Certificate[]
+  matchesAsCaregiver Match[]           @relation("MatchCaregiver")
+  careSessions       CareSession[]     @relation("CareSessionCaregiver")
+  reviewsReceived    Review[]          @relation("ReviewTarget")
+  bookmarkedBy       Bookmark[]
+  settlements        Settlement[]
+
+  @@index([region])
+  @@index([hourlyRate])
+  @@index([averageRating])
+  @@index([caregiverType])
+  @@index([grade])
+}
+
+// ─── Care Recipient (어르신/돌봄대상자) ───
+
+model CareRecipient {
+  id               String  @id @default(cuid())
+  guardianId       String
+  guardian         GuardianProfile @relation(fields: [guardianId], references: [id], onDelete: Cascade)
+  name             String
+  gender           String
+  birthYear        Int
+  careLevel        String?
+  diseases         String  @default("[]")
+  mobilityLevel    String  @default("INDEPENDENT")
+  weight           Float?
+  height           Float?
+  specialNotes     String?
+  medications      String?
+  emergencyContact String?
+  address          String?
+  profileImage     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  careSessionRecipients CareSessionRecipient[]
+  matchRecipients       MatchRecipient[]
+
+  @@index([guardianId])
+}
+
+// ─── Scheduling ───
+
+model Availability {
+  id          String           @id @default(cuid())
+  caregiverId String
+  caregiver   CaregiverProfile @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+  dayOfWeek   String
+  startTime   String
+  endTime     String
+  isActive    Boolean          @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([caregiverId, dayOfWeek, startTime])
+  @@index([caregiverId])
+}
+
+// ─── Certification (자격 인증) ───
+
+model Certificate {
+  id                  String           @id @default(cuid())
+  caregiverId         String
+  caregiver           CaregiverProfile @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+  name                String
+  certType            String           @default("OTHER") // CARE_WORKER_LICENSE, NURSING_AIDE_LICENSE, etc.
+  step                Int              @default(0) // 7단계 중 몇 단계 인증인지
+  issuingOrganization String
+  issueDate           DateTime
+  expirationDate      DateTime?
+  certificateNumber   String?
+  imageUrl            String?
+  verificationStatus  String           @default("PENDING")
+  verifiedAt          DateTime?
+  rejectionReason     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([caregiverId])
+  @@index([certType])
+}
+
+// ─── Matching (매칭) ───
+
+model Match {
+  id              String          @id @default(cuid())
+  guardianId      String
+  guardian         GuardianProfile  @relation("MatchGuardian", fields: [guardianId], references: [id])
+  caregiverId     String
+  caregiver        CaregiverProfile @relation("MatchCaregiver", fields: [caregiverId], references: [id])
+  status          String           @default("PENDING") // PENDING -> ACCEPTED -> CONFIRMED -> IN_PROGRESS -> COMPLETED
+  serviceCategory String
+  startDate       DateTime
+  endDate         DateTime?
+  schedule        String           @default("[]")
+  specialRequests String?
+  estimatedRate   Int?
+  requestedAt     DateTime         @default(now())
+  respondedAt     DateTime?
+  confirmedAt     DateTime?
+  cancelledAt     DateTime?
+  cancelReason    String?
+  completedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages     InterviewMessage[]
+  careSessions CareSession[]
+  recipients   MatchRecipient[]
+  contract     Contract?
+
+  @@index([guardianId])
+  @@index([caregiverId])
+  @@index([status])
+}
+
+model MatchRecipient {
+  id              String        @id @default(cuid())
+  matchId         String
+  match           Match         @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  careRecipientId String
+  careRecipient   CareRecipient @relation(fields: [careRecipientId], references: [id])
+
+  @@unique([matchId, careRecipientId])
+}
+
+// ─── Contract (표준 계약서) ───
+
+model Contract {
+  id               String   @id @default(cuid())
+  matchId          String   @unique
+  match            Match    @relation(fields: [matchId], references: [id])
+  serviceCategory  String
+  hourlyRate       Int
+  schedule         String   @default("[]") // JSON
+  startDate        DateTime
+  endDate          DateTime?
+  specialTerms     String?
+  guardianSigned   Boolean  @default(false)
+  guardianSignedAt DateTime?
+  caregiverSigned  Boolean  @default(false)
+  caregiverSignedAt DateTime?
+  status           String   @default("DRAFT") // DRAFT, PENDING_SIGN, ACTIVE, TERMINATED, EXPIRED
+  terminatedAt     DateTime?
+  terminationReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Chat (채팅) ───
+
+model InterviewMessage {
+  id          String  @id @default(cuid())
+  matchId     String
+  match       Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User    @relation(fields: [senderId], references: [id])
+  content     String
+  messageType String  @default("TEXT") // TEXT, IMAGE, FILE, SYSTEM, CONTRACT
+  imageUrl    String?
+  fileName    String?
+  fileUrl     String?
+  isRead      Boolean @default(false)
+  readAt      DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([matchId, createdAt])
+  @@index([senderId])
+}
+
+// ─── Care Session (돌봄 세션) ───
+
+model CareSession {
+  id            String           @id @default(cuid())
+  matchId       String
+  match         Match            @relation(fields: [matchId], references: [id])
+  caregiverId   String
+  caregiver     CaregiverProfile @relation("CareSessionCaregiver", fields: [caregiverId], references: [id])
+  status        String           @default("SCHEDULED")
+  scheduledDate DateTime
+  startTime     String
+  endTime       String
+  actualStart   DateTime?
+  actualEnd     DateTime?
+  hourlyRate    Int
+  totalHours    Float?
+  totalAmount   Int?
+  notes         String?
+  // GPS Check-in/out
+  checkInLat    Float?
+  checkInLng    Float?
+  checkInTime   DateTime?
+  checkOutLat   Float?
+  checkOutLng   Float?
+  checkOutTime  DateTime?
+  checkInAddress String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  recipients CareSessionRecipient[]
+  journals   Journal[]
+  review     Review?
+  settlement Settlement?
+
+  @@index([matchId])
+  @@index([caregiverId])
+  @@index([scheduledDate])
+}
+
+model CareSessionRecipient {
+  id              String        @id @default(cuid())
+  careSessionId   String
+  careSession     CareSession   @relation(fields: [careSessionId], references: [id], onDelete: Cascade)
+  careRecipientId String
+  careRecipient   CareRecipient @relation(fields: [careRecipientId], references: [id])
+
+  @@unique([careSessionId, careRecipientId])
+}
+
+// ─── Journal (돌봄일지) ───
+
+model Journal {
+  id              String      @id @default(cuid())
+  careSessionId   String
+  careSession     CareSession @relation(fields: [careSessionId], references: [id], onDelete: Cascade)
+  title           String
+  content         String
+  activities      String      @default("[]")
+  mood            String?
+  meals           String?
+  bloodPressure   String?
+  bloodSugar      Int?
+  temperature     Float?
+  waterIntake     Int?
+  bowelMovement   String?
+  medicationTaken Boolean     @default(false)
+  exerciseLog     String?
+  mentalState     String?
+  sleepQuality    String?
+  images          String      @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([careSessionId])
+}
+
+// ─── Settlement (정산) ───
+
+model Settlement {
+  id            String      @id @default(cuid())
+  careSessionId String      @unique
+  careSession   CareSession @relation(fields: [careSessionId], references: [id])
+  caregiverId   String
+  caregiver     CaregiverProfile @relation(fields: [caregiverId], references: [id])
+  amount        Int         // 총 금액
+  platformFee   Int         @default(0) // 플랫폼 수수료 (3%)
+  netAmount     Int         // 실수령액
+  status        String      @default("PENDING") // PENDING, CONFIRMED, DISPUTED, PAID, CANCELLED
+  confirmedAt   DateTime?
+  disputedAt    DateTime?
+  disputeReason String?
+  paidAt        DateTime?
+  paidMethod    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([caregiverId])
+  @@index([status])
+}
+
+// ─── Review (리뷰) ───
+
+model Review {
+  id              String           @id @default(cuid())
+  careSessionId   String           @unique
+  careSession     CareSession      @relation(fields: [careSessionId], references: [id])
+  authorId        String
+  author          GuardianProfile  @relation("ReviewAuthor", fields: [authorId], references: [id])
+  targetId        String
+  target          CaregiverProfile @relation("ReviewTarget", fields: [targetId], references: [id])
+  overallRating   Int
+  punctuality     Int?
+  attitude        Int?
+  professionalism Int?
+  communication   Int?
+  healthCareSkill Int?
+  content         String
+  images          String           @default("[]")
+  isVisible       Boolean          @default(true)
+  isReported      Boolean          @default(false)
+  reportReason    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([targetId])
+  @@index([authorId])
+}
+
+// ─── Bookmark (즐겨찾기) ───
+
+model Bookmark {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  caregiverId String
+  caregiver   CaregiverProfile @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, caregiverId])
+  @@index([userId])
+}
+
+// ─── Community (커뮤니티) ───
+
+model CommunityPost {
+  id        String  @id @default(cuid())
+  authorId  String
+  title     String
+  content   String
+  category  String
+  images    String  @default("[]")
+  viewCount Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  likes    CommunityLike[]
+  comments CommunityComment[]
+
+  @@index([category])
+  @@index([createdAt])
+}
+
+model CommunityLike {
+  id     String        @id @default(cuid())
+  postId String
+  post   CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String
+
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
+}
+
+model CommunityComment {
+  id       String        @id @default(cuid())
+  postId   String
+  post     CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId String
+  content  String
+  isActive Boolean       @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId, createdAt])
+}
+
+// ─── Notification (알림) ───
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String
+  title      String
+  body       String
+  link       String?
+  isRead     Boolean  @default(false)
+  readAt     DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
+
+// ─── Emergency SOS ───
+
+model EmergencySOS {
+  id            String  @id @default(cuid())
+  userId        String
+  careSessionId String?
+  latitude      Float?
+  longitude     Float?
+  status        String  @default("ACTIVE") // ACTIVE, RESOLVED, FALSE_ALARM
+  resolvedAt    DateTime?
+  notes         String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+}
