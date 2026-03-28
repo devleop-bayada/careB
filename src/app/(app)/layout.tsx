@@ -121,20 +121,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return pathname.startsWith(href);
   };
 
+  // 탭 페이지에서만 로고 헤더 표시 (하위 페이지는 BackHeader 사용)
+  const TAB_PAGES = ["/home", "/search", "/community", "/chat", "/my", "/care", "/matching", "/notifications"];
+  const isTabPage = TAB_PAGES.some((tab) => pathname === tab || pathname === tab + "/caregiver" || pathname === tab + "/guardian");
+  const showTopHeader = isTabPage;
+
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center">
       <div className="w-full max-w-[600px] relative flex flex-col min-h-screen">
-        {/* Top Header */}
-        <header className="sticky top-0 z-40 bg-white border-b border-gray-100 flex items-center justify-between px-4 h-14">
-          <Link href="/home" className="flex items-center gap-1.5">
-            <img src="/icon.png" alt="CareB" className="w-7 h-7 rounded-lg" />
-            <span className="text-primary-500 font-black text-lg tracking-tight">CareB</span>
-          </Link>
-          <Link href="/notifications" className="relative p-2 hover:bg-gray-50 rounded-full">
-            <Bell size={22} className="text-gray-700" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-          </Link>
-        </header>
+        {/* Top Header - 탭 페이지에서만 표시 */}
+        {showTopHeader && (
+          <header className="sticky top-0 z-40 bg-white border-b border-gray-100 flex items-center justify-between px-4 h-14">
+            <Link href="/home" className="flex items-center gap-1.5">
+              <img src="/icon.png" alt="CareB" className="w-7 h-7 rounded-lg" />
+              <span className="text-primary-500 font-black text-lg tracking-tight">CareB</span>
+            </Link>
+            <Link href="/notifications" className="relative p-2 hover:bg-gray-50 rounded-full">
+              <Bell size={22} className="text-gray-700" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+            </Link>
+          </header>
+        )}
 
         {/* Main Content */}
         <main className="flex-1 pb-16">{children}</main>
