@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Mail, UserPlus, Check, X, Shield } from "lucide-react";
+import { Users, Phone, UserPlus, Check, X, Shield } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
 
 interface CoGuardian {
   id: string;
   name: string;
-  email: string;
+  phone: string;
   permission: "READ" | "READ_WRITE";
   status: "PENDING" | "ACCEPTED";
 }
@@ -15,19 +15,26 @@ interface CoGuardian {
 export default function CoGuardiansPage() {
   const [coGuardians, setCoGuardians] = useState<CoGuardian[]>([]);
   const [showInviteForm, setShowInviteForm] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
+  const [invitePhone, setInvitePhone] = useState("");
   const [invitePermission, setInvitePermission] = useState<"READ" | "READ_WRITE">("READ");
   const [loading, setLoading] = useState(false);
 
+  function formatPhone(value: string) {
+    const nums = value.replace(/\D/g, "").slice(0, 11);
+    if (nums.length <= 3) return nums;
+    if (nums.length <= 7) return `${nums.slice(0, 3)}-${nums.slice(3)}`;
+    return `${nums.slice(0, 3)}-${nums.slice(3, 7)}-${nums.slice(7)}`;
+  }
+
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
-    if (!inviteEmail.trim() || loading) return;
+    if (!invitePhone.trim() || loading) return;
     setLoading(true);
     try {
       const res = await fetch("/api/co-guardians", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: inviteEmail, permission: invitePermission }),
+        body: JSON.stringify({ phone: invitePhone, permission: invitePermission }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -35,13 +42,13 @@ export default function CoGuardiansPage() {
           ...prev,
           {
             id: data.id || Date.now().toString(),
-            name: inviteEmail.split("@")[0],
-            email: inviteEmail,
+            name: data.name || invitePhone,
+            phone: invitePhone,
             permission: invitePermission,
             status: "PENDING",
           },
         ]);
-        setInviteEmail("");
+        setInvitePhone("");
         setShowInviteForm(false);
       }
     } catch {
@@ -66,12 +73,12 @@ export default function CoGuardiansPage() {
           <h3 className="text-sm font-bold text-gray-900 mb-3">공동보호자 초대</h3>
           <form onSubmit={handleInvite} className="space-y-3">
             <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1 block">이메일</label>
+              <label className="text-xs font-semibold text-gray-700 mb-1 block">전화번호</label>
               <input
-                type="email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="family@example.com"
+                type="tel"
+                value={invitePhone}
+                onChange={(e) => setInvitePhone(formatPhone(e.target.value))}
+                placeholder="010-0000-0000"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
               />
             </div>
@@ -104,7 +111,7 @@ export default function CoGuardiansPage() {
             </div>
             <button
               type="submit"
-              disabled={!inviteEmail.trim() || loading}
+              disabled={!invitePhone.trim() || loading}
               className="w-full bg-primary-500 text-white font-bold py-3 rounded-xl text-sm hover:bg-primary-600 transition-colors disabled:opacity-60"
             >
               {loading ? "초대 중..." : "초대장 보내기"}
@@ -131,7 +138,7 @@ export default function CoGuardiansPage() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-gray-900">{cg.name}</p>
-                    <p className="text-xs text-gray-500">{cg.email}</p>
+                    <p className="text-xs text-gray-500">{cg.phone}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

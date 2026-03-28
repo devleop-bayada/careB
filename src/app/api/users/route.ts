@@ -15,21 +15,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, password, name, phone, role } = parsed.data;
+    const { phone, password, name, email, role } = parsed.data;
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    // 전화번호 정규화 (010-XXXX-XXXX 형식)
+    const normalizedPhone = phone.replace(/-/g, "").replace(/^(\d{3})(\d{4})(\d{4})$/, "$1-$2-$3");
+
+    const existing = await prisma.user.findUnique({ where: { phone: normalizedPhone } });
     if (existing) {
-      return NextResponse.json({ error: "이미 사용 중인 이메일입니다." }, { status: 409 });
+      return NextResponse.json({ error: "이미 가입된 전화번호입니다." }, { status: 409 });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
       data: {
+        phone: normalizedPhone,
         email,
         passwordHash,
         name,
-        phone,
         role,
         ...(role === "GUARDIAN"
           ? { guardianProfile: { create: {} } }

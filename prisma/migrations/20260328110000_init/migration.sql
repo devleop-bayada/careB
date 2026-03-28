@@ -1,10 +1,10 @@
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
+    "email" TEXT,
     "passwordHash" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "phone" TEXT,
     "role" TEXT NOT NULL DEFAULT 'GUARDIAN',
     "profileImage" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
@@ -398,10 +398,10 @@ CREATE TABLE "EmergencySOS" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
 
 -- CreateIndex
-CREATE INDEX "User_email_idx" ON "User"("email");
+CREATE INDEX "User_phone_idx" ON "User"("phone");
 
 -- CreateIndex
 CREATE INDEX "User_role_idx" ON "User"("role");
@@ -627,3 +627,4 @@ ALTER TABLE "CommunityComment" ADD CONSTRAINT "CommunityComment_postId_fkey" FOR
 
 -- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+

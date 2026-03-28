@@ -34,6 +34,7 @@ async function main() {
   const adminHash = await bcrypt.hash("admin123", 12);
   const admin = await prisma.user.create({
     data: {
+      phone: "010-0000-0000",
       email: "admin@bayada.co.kr",
       passwordHash: adminHash,
       name: "관리자",
@@ -41,17 +42,16 @@ async function main() {
       isActive: true,
     },
   });
-  console.log("Created admin:", admin.email);
+  console.log("Created admin:", admin.phone);
 
   // Guardian users
   const guardianHash = await bcrypt.hash("guardian123", 12);
 
   const guardian1 = await prisma.user.create({
     data: {
-      email: "guardian1@example.com",
+      phone: "010-1234-5678",
       passwordHash: guardianHash,
       name: "김영숙",
-      phone: "010-1234-5678",
       role: "GUARDIAN",
       guardianProfile: {
         create: {
@@ -67,10 +67,9 @@ async function main() {
 
   const guardian2 = await prisma.user.create({
     data: {
-      email: "guardian2@example.com",
+      phone: "010-2345-6789",
       passwordHash: guardianHash,
       name: "박정수",
-      phone: "010-2345-6789",
       role: "GUARDIAN",
       guardianProfile: {
         create: {
@@ -86,10 +85,9 @@ async function main() {
 
   const guardian3 = await prisma.user.create({
     data: {
-      email: "guardian3@example.com",
+      phone: "010-3456-7890",
       passwordHash: guardianHash,
       name: "이현주",
-      phone: "010-3456-7890",
       role: "GUARDIAN",
       guardianProfile: {
         create: {
@@ -200,10 +198,9 @@ async function main() {
 
   const caregiver1 = await prisma.user.create({
     data: {
-      email: "caregiver1@example.com",
+      phone: "010-4567-8901",
       passwordHash: caregiverHash,
       name: "최순자",
-      phone: "010-4567-8901",
       role: "CAREGIVER",
       caregiverProfile: {
         create: {
@@ -277,10 +274,9 @@ async function main() {
 
   const caregiver2 = await prisma.user.create({
     data: {
-      email: "caregiver2@example.com",
+      phone: "010-5678-9012",
       passwordHash: caregiverHash,
       name: "정미경",
-      phone: "010-5678-9012",
       role: "CAREGIVER",
       caregiverProfile: {
         create: {
@@ -353,10 +349,9 @@ async function main() {
 
   const caregiver3 = await prisma.user.create({
     data: {
-      email: "caregiver3@example.com",
+      phone: "010-6789-0123",
       passwordHash: caregiverHash,
       name: "한영희",
-      phone: "010-6789-0123",
       role: "CAREGIVER",
       caregiverProfile: {
         create: {
@@ -413,10 +408,9 @@ async function main() {
 
   const caregiver4 = await prisma.user.create({
     data: {
-      email: "caregiver4@example.com",
+      phone: "010-7890-1234",
       passwordHash: caregiverHash,
       name: "오정민",
-      phone: "010-7890-1234",
       role: "CAREGIVER",
       caregiverProfile: {
         create: {
@@ -482,10 +476,9 @@ async function main() {
 
   const caregiver5 = await prisma.user.create({
     data: {
-      email: "caregiver5@example.com",
+      phone: "010-8901-2345",
       passwordHash: caregiverHash,
       name: "윤은정",
-      phone: "010-8901-2345",
       role: "CAREGIVER",
       caregiverProfile: {
         create: {
@@ -1224,17 +1217,56 @@ async function main() {
     });
   console.log("Updated certificate certType and step fields");
 
+  // ─── 김영민 계정 (보호자 + 요양보호사 둘 다) ───
+  const ymHash = await bcrypt.hash("password123", 12);
+
+  const ymGuardian = await prisma.user.create({
+    data: {
+      phone: "010-8720-8257",
+      passwordHash: ymHash,
+      name: "김영민",
+      role: "GUARDIAN",
+      guardianProfile: {
+        create: {
+          region: "서울",
+          introduction: "테스트 보호자 계정입니다.",
+        },
+      },
+    },
+  });
+
+  const ymCaregiver = await prisma.user.create({
+    data: {
+      phone: "010-8720-8258",
+      passwordHash: ymHash,
+      name: "김영민(요양보호사)",
+      role: "CAREGIVER",
+      caregiverProfile: {
+        create: {
+          gender: "MALE",
+          region: "서울",
+          hourlyRate: 15000,
+          serviceCategories: JSON.stringify(["HOME_CARE"]),
+          specialties: JSON.stringify(["방문요양"]),
+        },
+      },
+    },
+  });
+  console.log("Created 김영민 accounts (Guardian: 010-8720-8257, Caregiver: 010-8720-8258)");
+
   console.log("\nSeed completed successfully!");
-  console.log("\nLogin credentials:");
-  console.log("  Admin:      admin@bayada.co.kr / admin123");
-  console.log("  Guardian1:  guardian1@example.com / guardian123  (김영숙, 서울 강남구)");
-  console.log("  Guardian2:  guardian2@example.com / guardian123  (박정수, 서울 서초구)");
-  console.log("  Guardian3:  guardian3@example.com / guardian123  (이현주, 경기 성남시)");
-  console.log("  Caregiver1: caregiver1@example.com / caregiver123  (최순자, 요양보호사/치매전문)");
-  console.log("  Caregiver2: caregiver2@example.com / caregiver123  (정미경, 간호조무사/뇌졸중재활)");
-  console.log("  Caregiver3: caregiver3@example.com / caregiver123  (한영희, 요양보호사/방문요양)");
-  console.log("  Caregiver4: caregiver4@example.com / caregiver123  (오정민, 요양보호사/남성전문)");
-  console.log("  Caregiver5: caregiver5@example.com / caregiver123  (윤은정, 사회복지사/호스피스)");
+  console.log("\nLogin credentials (전화번호 로그인):");
+  console.log("  Admin:      010-0000-0000 / admin123");
+  console.log("  Guardian1:  010-1234-5678 / guardian123  (김영숙, 서울 강남구)");
+  console.log("  Guardian2:  010-2345-6789 / guardian123  (박정수, 서울 서초구)");
+  console.log("  Guardian3:  010-3456-7890 / guardian123  (이현주, 경기 성남시)");
+  console.log("  Caregiver1: 010-4567-8901 / caregiver123  (최순자, 요양보호사/치매전문)");
+  console.log("  Caregiver2: 010-5678-9012 / caregiver123  (정미경, 간호조무사/뇌졸중재활)");
+  console.log("  Caregiver3: 010-6789-0123 / caregiver123  (한영희, 요양보호사/방문요양)");
+  console.log("  Caregiver4: 010-7890-1234 / caregiver123  (오정민, 요양보호사/남성전문)");
+  console.log("  Caregiver5: 010-8901-2345 / caregiver123  (윤은정, 사회복지사/호스피스)");
+  console.log("  김영민(보호자):    010-8720-8257 / password123");
+  console.log("  김영민(요양보호사): 010-8720-8258 / password123");
   console.log("\nNew seed data summary:");
   console.log("  MatchRecipient: 2 (match1->김말순, match2->이옥분)");
   console.log("  Contract: 2 (ACTIVE, PENDING_SIGN)");

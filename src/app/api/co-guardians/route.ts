@@ -41,16 +41,17 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { email, permission } = body;
+  const { phone, permission } = body;
 
-  if (!email) {
-    return NextResponse.json({ error: "이메일이 필요합니다." }, { status: 400 });
+  if (!phone) {
+    return NextResponse.json({ error: "전화번호가 필요합니다." }, { status: 400 });
   }
 
-  // Find user by email
-  const targetUser = await prisma.user.findUnique({ where: { email } });
+  // Find user by phone
+  const normalizedPhone = phone.replace(/-/g, "").replace(/^(\d{3})(\d{4})(\d{4})$/, "$1-$2-$3");
+  const targetUser = await prisma.user.findUnique({ where: { phone: normalizedPhone } });
   if (!targetUser) {
-    return NextResponse.json({ error: "해당 이메일의 사용자를 찾을 수 없습니다." }, { status: 404 });
+    return NextResponse.json({ error: "해당 전화번호의 사용자를 찾을 수 없습니다." }, { status: 404 });
   }
 
   const targetProfile = await prisma.guardianProfile.findUnique({ where: { userId: targetUser.id } });
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
       ownerId: guardianProfile.id,
       memberId: targetProfile.id,
       permission: permission ?? "READ",
-      inviteEmail: email,
+      inviteEmail: phone,
       status: "PENDING",
     },
     include: {

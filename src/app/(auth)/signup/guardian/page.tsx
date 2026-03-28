@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import BackHeader from "@/components/layout/BackHeader";
 
-const STEPS = ["계정 정보", "기본 정보", "지역 및 어르신 정보"];
+const STEPS = ["계정 정보", "지역 및 어르신 정보"];
 
 interface CareRecipientInput {
   birthYear: string;
@@ -18,19 +18,23 @@ export default function GuardianSignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Step 1
-  const [email, setEmail] = useState("");
+  // Step 0
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-
-  // Step 2
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
 
-  // Step 3
+  // Step 1
   const [region, setRegion] = useState("");
   const [district, setDistrict] = useState("");
   const [recipients, setRecipients] = useState<CareRecipientInput[]>([{ birthYear: "", gender: "남성" }]);
+
+  function formatPhone(value: string) {
+    const nums = value.replace(/\D/g, "").slice(0, 11);
+    if (nums.length <= 3) return nums;
+    if (nums.length <= 7) return `${nums.slice(0, 3)}-${nums.slice(3)}`;
+    return `${nums.slice(0, 3)}-${nums.slice(3, 7)}-${nums.slice(7)}`;
+  }
 
   function addRecipient() {
     setRecipients([...recipients, { birthYear: "", gender: "남성" }]);
@@ -48,14 +52,12 @@ export default function GuardianSignupPage() {
 
   function validateStep() {
     if (step === 0) {
-      if (!email || !password || !passwordConfirm) return "모든 항목을 입력해주세요.";
+      if (!phone || !password || !passwordConfirm || !name) return "모든 항목을 입력해주세요.";
       if (password !== passwordConfirm) return "비밀번호가 일치하지 않습니다.";
       if (password.length < 8) return "비밀번호는 8자 이상이어야 합니다.";
+      if (!/^010-?\d{4}-?\d{4}$/.test(phone.replace(/-/g, "").replace(/^(\d{3})(\d{4})(\d{4})$/, "$1-$2-$3"))) return "올바른 전화번호를 입력해주세요.";
     }
     if (step === 1) {
-      if (!name || !phone) return "모든 항목을 입력해주세요.";
-    }
-    if (step === 2) {
       if (!region || !district) return "지역을 선택해주세요.";
     }
     return "";
@@ -78,10 +80,9 @@ export default function GuardianSignupPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          phone,
           password,
           name,
-          phone,
           role: "GUARDIAN",
           region,
           district,
@@ -97,7 +98,7 @@ export default function GuardianSignupPage() {
         setLoading(false);
         return;
       }
-      await signIn("credentials", { email, password, redirect: false });
+      await signIn("credentials", { phone, password, redirect: false });
       router.push("/home");
     } catch {
       setError("회원가입 중 오류가 발생했습니다.");
@@ -131,16 +132,26 @@ export default function GuardianSignupPage() {
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">{error}</div>
       )}
 
-      {/* Step 0 */}
+      {/* Step 0: 계정 정보 (전화번호 + 비밀번호 + 이름) */}
       {step === 0 && (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">이메일</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">이름</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="이메일을 입력하세요"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="이름을 입력하세요"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">휴대폰 번호</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(formatPhone(e.target.value))}
+              placeholder="010-0000-0000"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
           </div>
@@ -167,34 +178,8 @@ export default function GuardianSignupPage() {
         </div>
       )}
 
-      {/* Step 1 */}
+      {/* Step 1: 지역 및 어르신 정보 */}
       {step === 1 && (
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">이름</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="이름을 입력하세요"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">휴대폰 번호</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="010-0000-0000"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Step 2 */}
-      {step === 2 && (
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">지역</label>

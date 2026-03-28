@@ -1,12 +1,14 @@
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  email: z.string().email("올바른 이메일 주소를 입력해주세요."),
+  phone: z.string().regex(/^010-?\d{4}-?\d{4}$/, "올바른 전화번호를 입력해주세요."),
   password: z.string().min(1, "비밀번호를 입력해주세요."),
 });
 
 export const signupSchema = z.object({
-  email: z.string().email("올바른 이메일 주소를 입력해주세요."),
+  phone: z
+    .string()
+    .regex(/^010-?\d{4}-?\d{4}$/, "올바른 전화번호 형식을 입력해주세요. (010-XXXX-XXXX)"),
   password: z
     .string()
     .min(8, "비밀번호는 8자 이상이어야 합니다.")
@@ -15,10 +17,7 @@ export const signupSchema = z.object({
     .string()
     .min(2, "이름은 2자 이상이어야 합니다.")
     .max(50, "이름은 50자 이하여야 합니다."),
-  phone: z
-    .string()
-    .regex(/^010-\d{4}-\d{4}$/, "올바른 전화번호 형식을 입력해주세요. (010-XXXX-XXXX)")
-    .optional(),
+  email: z.string().email("올바른 이메일 주소를 입력해주세요.").optional(),
   role: z.enum(["GUARDIAN", "CAREGIVER"], { message: "역할을 선택해주세요." }),
 });
 
