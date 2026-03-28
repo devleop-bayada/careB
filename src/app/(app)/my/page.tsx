@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import Avatar from "@/components/ui/Avatar";
 import Badge from "@/components/ui/Badge";
-import ListItem from "@/components/ui/ListItem";
 import MyPageSignOut from "./MyPageSignOut";
 
 export default async function MyPage() {
@@ -65,14 +64,18 @@ export default async function MyPage() {
 
       {/* Menu Items */}
       <div className="mt-2 bg-white divide-y divide-gray-50">
-        {menuItems.map((item) => (
-          <ListItem
-            key={item.href}
-            icon={item.icon}
-            title={item.label}
-            href={item.href}
-          />
-        ))}
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link key={item.href} href={item.href} className="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
+              <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center">
+                <Icon size={18} className="text-gray-600" />
+              </div>
+              <span className="flex-1 text-sm font-medium text-gray-900">{item.label}</span>
+              <ChevronRight size={16} className="text-gray-300" />
+            </Link>
+          );
+        })}
       </div>
 
       {/* Sign Out */}
