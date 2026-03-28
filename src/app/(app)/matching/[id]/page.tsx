@@ -56,7 +56,7 @@ export default async function MatchingDetailPage({ params }: { params: { id: str
   const currentStepIndex = TIMELINE_STEPS.indexOf(match.status);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 pb-24">
+    <div className="flex flex-col min-h-screen bg-gray-50 pb-32">
       <BackHeader title="매칭 상세" fallbackHref="/matching" />
 
       {/* Status Header */}

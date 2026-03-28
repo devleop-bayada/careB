@@ -92,7 +92,7 @@ export default function ChatRoomPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col bg-gray-50" style={{ height: "calc(100vh - 4rem)" }}>
       <BackHeader title={otherUser?.name ?? "채팅"} fallbackHref="/chat" />
 
       {/* Messages */}

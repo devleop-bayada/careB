@@ -44,7 +44,7 @@ export default function PassPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 pb-24">
+    <div className="flex flex-col min-h-screen bg-gray-50 pb-32">
       <BackHeader title="이용권" fallbackHref="/my" />
 
       {/* Current Status */}
@@ -119,7 +119,7 @@ export default function PassPage() {
       )}
 
       {/* Purchase Button */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-40">
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
         <button
           onClick={handlePurchase}
           className="w-full bg-primary-500 text-white font-bold py-4 rounded-xl text-sm hover:bg-primary-600 transition-colors"

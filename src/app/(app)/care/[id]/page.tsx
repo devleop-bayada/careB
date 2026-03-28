@@ -54,7 +54,7 @@ export default async function CareSessionDetailPage({ params }: { params: { id: 
   const canWriteJournal = isCaregiver && careSession.status === "COMPLETED";
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 pb-24">
+    <div className="flex flex-col min-h-screen bg-gray-50 pb-32">
       <BackHeader title="돌봄 상세" fallbackHref="/care" />
 
       {/* Status Banner */}

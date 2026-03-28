@@ -107,7 +107,7 @@ export default async function CommunityPage({
       {/* Floating Write Button */}
       <Link
         href="/community/write"
-        className="fixed bottom-20 right-4 w-12 h-12 bg-primary-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary-600 transition-colors z-30"
+        className="fixed bottom-24 right-4 w-12 h-12 bg-primary-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary-600 transition-colors z-30"
       >
         <PenSquare size={20} />
       </Link>

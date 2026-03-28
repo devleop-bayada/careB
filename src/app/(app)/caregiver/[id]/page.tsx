@@ -46,7 +46,7 @@ export default async function CaregiverDetailPage({ params }: { params: { id: st
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 pb-24">
+    <div className="flex flex-col min-h-screen bg-gray-50 pb-32">
       <BackHeader title="요양보호사 프로필" fallbackHref="/search/caregiver" />
 
       {/* Profile Header */}
@@ -131,7 +131,7 @@ export default async function CaregiverDetailPage({ params }: { params: { id: st
       </div>
 
       {/* Fixed Bottom CTA */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-40">
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
         <div className="flex gap-2">
           <Link
             href={`/matching?caregiverId=${params.id}`}
