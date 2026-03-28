@@ -363,7 +363,7 @@ export default function JournalWritePage() {
           </button>
         </div>
 
-        <div className="pb-4">
+        <div className="pb-32">
           <button type="submit" disabled={loading || !title.trim() || !content.trim()}
             className="w-full bg-primary-500 text-white font-bold py-4 rounded-xl text-sm hover:bg-primary-600 transition-colors disabled:opacity-60">
             {loading ? "저장 중..." : "일지 저장"}

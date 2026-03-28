@@ -121,7 +121,7 @@ export default function CoGuardiansPage() {
       )}
 
       {/* Co-Guardian List */}
-      <div className="px-4 mt-4 space-y-2 pb-8">
+      <div className="px-4 mt-4 space-y-2 pb-16">
         {coGuardians.length === 0 && !showInviteForm ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Users size={40} className="text-gray-200 mb-3" />

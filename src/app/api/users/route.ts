@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
               },
             }),
       },
-      select: { id: true, email: true, name: true, role: true, createdAt: true },
+      select: { id: true, email: true, name: true, phone: true, role: true, createdAt: true },
     });
 
     return NextResponse.json({ user }, { status: 201 });

@@ -60,7 +60,7 @@ export default async function MyPage() {
                 {isGuardian ? "보호자 회원" : "요양보호사 회원"}
               </span>
             </div>
-            <p className="text-sm text-gray-500 mt-0.5">{user.email}</p>
+            <p className="text-sm text-gray-500 mt-0.5">{user.phone}</p>
           </div>
           <Link href="/my/profile" className="text-xs text-primary-500 font-semibold">
             수정

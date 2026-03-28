@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
-import Link from "next/link";
 import BackHeader from "@/components/layout/BackHeader";
 
 const NOTIFICATION_SETTINGS = [
@@ -24,13 +23,27 @@ export default function SettingsPage() {
     community: true,
   });
 
+  const [toast, setToast] = useState(false);
+
   function toggle(id: string) {
     setNotifications((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  function handlePlaceholder() {
+    setToast(true);
+    setTimeout(() => setToast(false), 2000);
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <BackHeader title="설정" fallbackHref="/my" />
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-lg animate-fade-in">
+          준비 중인 기능입니다
+        </div>
+      )}
 
       {/* Notifications */}
       <div className="mt-4">
@@ -62,15 +75,15 @@ export default function SettingsPage() {
         <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">계정</p>
         <div className="bg-white divide-y divide-gray-50">
           {[
-            { label: "비밀번호 변경", href: "#" },
-            { label: "연결된 소셜 계정", href: "#" },
+            { label: "비밀번호 변경" },
+            { label: "연결된 소셜 계정" },
           ].map((item) => (
-            <Link key={item.label} href={item.href}>
+            <button key={item.label} onClick={handlePlaceholder} className="w-full">
               <div className="flex items-center justify-between px-4 py-4">
                 <span className="text-sm font-medium text-gray-900">{item.label}</span>
                 <ChevronRight size={16} className="text-gray-300" />
               </div>
-            </Link>
+            </button>
           ))}
         </div>
       </div>
@@ -80,16 +93,16 @@ export default function SettingsPage() {
         <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">정보</p>
         <div className="bg-white divide-y divide-gray-50">
           {[
-            { label: "서비스 이용약관", href: "#" },
-            { label: "개인정보처리방침", href: "#" },
-            { label: "오픈소스 라이선스", href: "#" },
+            { label: "서비스 이용약관" },
+            { label: "개인정보처리방침" },
+            { label: "오픈소스 라이선스" },
           ].map((item) => (
-            <Link key={item.label} href={item.href}>
+            <button key={item.label} onClick={handlePlaceholder} className="w-full">
               <div className="flex items-center justify-between px-4 py-4">
                 <span className="text-sm font-medium text-gray-900">{item.label}</span>
                 <ChevronRight size={16} className="text-gray-300" />
               </div>
-            </Link>
+            </button>
           ))}
           <div className="flex items-center justify-between px-4 py-4">
             <span className="text-sm font-medium text-gray-900">앱 버전</span>
@@ -115,12 +128,12 @@ export default function SettingsPage() {
       {/* Danger Zone */}
       <div className="mt-4 mb-8">
         <div className="bg-white">
-          <Link href="#">
+          <button onClick={handlePlaceholder} className="w-full">
             <div className="flex items-center justify-between px-4 py-4">
               <span className="text-sm font-medium text-red-500">회원탈퇴</span>
               <ChevronRight size={16} className="text-gray-300" />
             </div>
-          </Link>
+          </button>
         </div>
       </div>
     </div>

@@ -135,7 +135,7 @@ export default function CertificatesPage() {
       </div>
 
       {/* Step Cards */}
-      <div className="px-4 mt-4 space-y-2 pb-8">
+      <div className="px-4 mt-4 space-y-2 pb-16">
         {CERT_STEPS.map((cert) => {
           const status = getStatus(cert.id);
           return (

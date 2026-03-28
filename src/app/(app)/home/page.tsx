@@ -90,7 +90,7 @@ export default async function HomePage() {
   const { recentCaregivers, upcomingCares } = await getHomeData(user.id, user.role);
 
   return (
-    <div className="pb-4">
+    <div className="pb-16">
       {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-primary-600 to-primary-400 px-5 pt-5 pb-8">
         <p className="text-primary-100 text-sm">안녕하세요</p>
