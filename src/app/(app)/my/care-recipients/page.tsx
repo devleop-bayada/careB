@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import CustomDatePicker from "@/components/ui/CustomDatePicker";
 
 interface CareRecipient {
   id: string;
@@ -26,6 +28,8 @@ export default function CareRecipientsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<CareRecipientForm>({ name: "", birthDate: "", gender: "MALE", specialNotes: "" });
   const [saving, setSaving] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   useEffect(() => { fetchRecipients(); }, []);
 
@@ -82,9 +86,15 @@ export default function CareRecipientsPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("어르신 정보를 삭제하시겠어요?")) return;
-    await fetch(`/api/care-recipients/${id}`, { method: "DELETE" });
+  function requestDelete(id: string) {
+    setDeleteTargetId(id);
+    setConfirmOpen(true);
+  }
+
+  async function handleDelete() {
+    if (!deleteTargetId) return;
+    await fetch(`/api/care-recipients/${deleteTargetId}`, { method: "DELETE" });
+    setDeleteTargetId(null);
     fetchRecipients();
   }
 
@@ -125,7 +135,7 @@ export default function CareRecipientsPage() {
                     <button onClick={() => openEdit(recipient)} className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                       <Pencil size={16} />
                     </button>
-                    <button onClick={() => handleDelete(recipient.id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                    <button onClick={() => requestDelete(recipient.id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -155,8 +165,11 @@ export default function CareRecipientsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">생년월일 *</label>
-                <input type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                <CustomDatePicker
+                  value={form.birthDate}
+                  onChange={(val) => setForm({ ...form, birthDate: val })}
+                  placeholder="생년월일 선택"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">성별</label>
@@ -185,6 +198,17 @@ export default function CareRecipientsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setDeleteTargetId(null); }}
+        onConfirm={handleDelete}
+        title="어르신 삭제"
+        message="어르신 정보를 삭제하시겠어요?"
+        confirmText="삭제"
+        cancelText="취소"
+        variant="danger"
+      />
     </div>
   );
 }

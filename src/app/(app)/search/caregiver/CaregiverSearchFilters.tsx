@@ -2,8 +2,15 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useCallback } from "react";
+import CustomSelect from "@/components/ui/CustomSelect";
 
-const REGIONS = ["서울", "경기", "인천", "부산"];
+const REGIONS = [
+  { value: "", label: "지역 전체" },
+  { value: "서울", label: "서울" },
+  { value: "경기", label: "경기" },
+  { value: "인천", label: "인천" },
+  { value: "부산", label: "부산" },
+];
 const CARE_TYPES = [
   { value: "", label: "전체" },
   { value: "HOME_CARE", label: "방문요양" },
@@ -85,45 +92,44 @@ export default function CaregiverSearchFilters({
       </div>
       {/* Second row: region + caregiver type + sort */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-        <select
+        <CustomSelect
           value={searchParams.region || ""}
-          onChange={(e) => updateFilter("region", e.target.value)}
-          className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 focus:outline-none"
-        >
-          <option value="">지역 전체</option>
-          {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-        </select>
-        <select
+          onChange={(val) => updateFilter("region", val)}
+          options={REGIONS}
+          placeholder="지역 전체"
+          size="sm"
+        />
+        <CustomSelect
           value={searchParams.caregiverType || ""}
-          onChange={(e) => updateFilter("caregiverType", e.target.value)}
-          className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 focus:outline-none"
-        >
-          {CAREGIVER_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
-        <select
+          onChange={(val) => updateFilter("caregiverType", val)}
+          options={CAREGIVER_TYPES}
+          placeholder="전체"
+          size="sm"
+        />
+        <CustomSelect
           value={searchParams.sort || "updatedAt"}
-          onChange={(e) => updateFilter("sort", e.target.value)}
-          className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 focus:outline-none"
-        >
-          {SORT_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-        </select>
+          onChange={(val) => updateFilter("sort", val)}
+          options={SORT_OPTIONS}
+          placeholder="정렬"
+          size="sm"
+        />
       </div>
       {/* Third row: specialty + grade */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-        <select
+        <CustomSelect
           value={searchParams.specialty || ""}
-          onChange={(e) => updateFilter("specialty", e.target.value)}
-          className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 focus:outline-none"
-        >
-          {SPECIALTY_TYPES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-        </select>
-        <select
+          onChange={(val) => updateFilter("specialty", val)}
+          options={SPECIALTY_TYPES}
+          placeholder="전문분야 전체"
+          size="sm"
+        />
+        <CustomSelect
           value={searchParams.grade || ""}
-          onChange={(e) => updateFilter("grade", e.target.value)}
-          className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 focus:outline-none"
-        >
-          {GRADE_OPTIONS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
-        </select>
+          onChange={(val) => updateFilter("grade", val)}
+          options={GRADE_OPTIONS}
+          placeholder="등급 전체"
+          size="sm"
+        />
       </div>
     </div>
   );

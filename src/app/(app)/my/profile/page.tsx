@@ -139,12 +139,12 @@ export default function ProfileEditPage() {
           <>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">희망 시급 (원)</label>
-              <input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} placeholder="예: 15000"
+              <input type="text" inputMode="numeric" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value.replace(/\D/g, ""))} placeholder="예: 15000"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">경력 (년)</label>
-              <input type="number" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} placeholder="예: 3"
+              <input type="text" inputMode="numeric" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value.replace(/\D/g, ""))} placeholder="예: 3"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
             </div>
             <div>

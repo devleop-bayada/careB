@@ -7,6 +7,7 @@ import {
   GlassWater, Pill, Dumbbell, Brain, Moon
 } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 const ACTIVITIES = [
   { value: "meal", label: "🍚 식사" },
@@ -120,7 +121,6 @@ export default function JournalWritePage() {
   }
 
   const inputClass = "w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400";
-  const selectClass = "w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 bg-white";
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -228,9 +228,10 @@ export default function JournalWritePage() {
                 혈당 (mg/dL)
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 value={bloodSugar}
-                onChange={(e) => setBloodSugar(e.target.value)}
+                onChange={(e) => setBloodSugar(e.target.value.replace(/\D/g, ""))}
                 placeholder="100"
                 className={inputClass}
               />
@@ -238,14 +239,14 @@ export default function JournalWritePage() {
             <div>
               <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1.5">
                 <Thermometer size={13} className="text-primary-400" />
-                체온 (°C)
+                체온 (&deg;C)
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={temperature}
-                onChange={(e) => setTemperature(e.target.value)}
+                onChange={(e) => setTemperature(e.target.value.replace(/[^0-9.]/g, ""))}
                 placeholder="36.5"
-                step="0.1"
                 className={inputClass}
               />
             </div>
@@ -255,9 +256,10 @@ export default function JournalWritePage() {
                 수분섭취 (ml)
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 value={waterIntake}
-                onChange={(e) => setWaterIntake(e.target.value)}
+                onChange={(e) => setWaterIntake(e.target.value.replace(/\D/g, ""))}
                 placeholder="500"
                 className={inputClass}
               />
@@ -267,30 +269,24 @@ export default function JournalWritePage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-semibold text-gray-700 mb-1.5 block">배변 상태</label>
-              <select
+              <CustomSelect
                 value={bowelMovement}
-                onChange={(e) => setBowelMovement(e.target.value)}
-                className={selectClass}
-              >
-                {BOWEL_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+                onChange={setBowelMovement}
+                options={BOWEL_OPTIONS}
+                placeholder="선택"
+              />
             </div>
             <div>
               <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1.5">
                 <Brain size={13} className="text-purple-400" />
                 정신 상태
               </label>
-              <select
+              <CustomSelect
                 value={mentalState}
-                onChange={(e) => setMentalState(e.target.value)}
-                className={selectClass}
-              >
-                {MENTAL_STATE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+                onChange={setMentalState}
+                options={MENTAL_STATE_OPTIONS}
+                placeholder="선택"
+              />
             </div>
           </div>
 
@@ -299,15 +295,12 @@ export default function JournalWritePage() {
               <Moon size={13} className="text-indigo-400" />
               수면 품질
             </label>
-            <select
+            <CustomSelect
               value={sleepQuality}
-              onChange={(e) => setSleepQuality(e.target.value)}
-              className={selectClass}
-            >
-              {SLEEP_QUALITY_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+              onChange={setSleepQuality}
+              options={SLEEP_QUALITY_OPTIONS}
+              placeholder="선택"
+            />
           </div>
 
           <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-3">

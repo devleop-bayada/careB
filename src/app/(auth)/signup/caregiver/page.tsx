@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import BackHeader from "@/components/layout/BackHeader";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 const STEPS = ["계정 정보", "요양보호사 정보"];
 
@@ -20,6 +21,13 @@ const CARE_TYPES = [
   { value: "NURSING", label: "방문간호" },
   { value: "COGNITIVE", label: "인지활동" },
   { value: "HOUSEKEEPING", label: "가사지원" },
+];
+
+const REGION_OPTIONS = [
+  { value: "서울", label: "서울" },
+  { value: "경기", label: "경기" },
+  { value: "인천", label: "인천" },
+  { value: "부산", label: "부산" },
 ];
 
 export default function CaregiverSignupPage() {
@@ -190,13 +198,12 @@ export default function CaregiverSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">지역</label>
-            <select value={region} onChange={(e) => setRegion(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400">
-              <option value="">지역 선택</option>
-              {["서울", "경기", "인천", "부산"].map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
+            <CustomSelect
+              value={region}
+              onChange={setRegion}
+              options={REGION_OPTIONS}
+              placeholder="지역 선택"
+            />
           </div>
 
           <div>
@@ -207,7 +214,7 @@ export default function CaregiverSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">희망 시급 (원)</label>
-            <input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} placeholder="예: 15000"
+            <input type="text" inputMode="numeric" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value.replace(/\D/g, ""))} placeholder="예: 15000"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
           </div>
 

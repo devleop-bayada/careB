@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle, Crown, Zap } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
+import AlertDialog from "@/components/ui/AlertDialog";
 
 const PASS_OPTIONS = [
   {
@@ -36,11 +37,12 @@ const PASS_OPTIONS = [
 
 export default function PassPage() {
   const [selected, setSelected] = useState("30days");
+  const [alertOpen, setAlertOpen] = useState(false);
 
   const selectedPass = PASS_OPTIONS.find((p) => p.id === selected);
 
   function handlePurchase() {
-    alert("결제 기능은 준비 중입니다.");
+    setAlertOpen(true);
   }
 
   return (
@@ -127,6 +129,13 @@ export default function PassPage() {
           {selectedPass?.price.toLocaleString()}원 구매하기
         </button>
       </div>
+
+      <AlertDialog
+        isOpen={alertOpen}
+        onClose={() => setAlertOpen(false)}
+        title="안내"
+        message="결제 기능은 준비 중입니다."
+      />
     </div>
   );
 }

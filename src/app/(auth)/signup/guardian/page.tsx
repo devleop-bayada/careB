@@ -4,8 +4,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import BackHeader from "@/components/layout/BackHeader";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 const STEPS = ["계정 정보", "지역 및 어르신 정보"];
+
+const REGION_OPTIONS = [
+  { value: "서울", label: "서울" },
+  { value: "경기", label: "경기" },
+  { value: "인천", label: "인천" },
+  { value: "부산", label: "부산" },
+];
+
+const GENDER_OPTIONS = [
+  { value: "남성", label: "남성" },
+  { value: "여성", label: "여성" },
+];
 
 interface CareRecipientInput {
   birthYear: string;
@@ -183,16 +196,12 @@ export default function GuardianSignupPage() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">지역</label>
-            <select
+            <CustomSelect
               value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-            >
-              <option value="">지역 선택</option>
-              {["서울", "경기", "인천", "부산"].map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
+              onChange={setRegion}
+              options={REGION_OPTIONS}
+              placeholder="지역 선택"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">구/시</label>
@@ -214,22 +223,22 @@ export default function GuardianSignupPage() {
               {recipients.map((recipient, i) => (
                 <div key={i} className="flex gap-2 items-center">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     value={recipient.birthYear}
-                    onChange={(e) => updateRecipient(i, "birthYear", e.target.value)}
+                    onChange={(e) => updateRecipient(i, "birthYear", e.target.value.replace(/\D/g, ""))}
                     placeholder="출생연도 (예: 1945)"
                     className="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
                   />
-                  <select
+                  <CustomSelect
                     value={recipient.gender}
-                    onChange={(e) => updateRecipient(i, "gender", e.target.value)}
-                    className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                  >
-                    <option>남성</option>
-                    <option>여성</option>
-                  </select>
+                    onChange={(val) => updateRecipient(i, "gender", val)}
+                    options={GENDER_OPTIONS}
+                    placeholder="성별"
+                    size="sm"
+                  />
                   {recipients.length > 1 && (
-                    <button onClick={() => removeRecipient(i)} className="text-gray-400 hover:text-red-500 text-lg leading-none">×</button>
+                    <button onClick={() => removeRecipient(i)} className="text-gray-400 hover:text-red-500 text-lg leading-none">&times;</button>
                   )}
                 </div>
               ))}
