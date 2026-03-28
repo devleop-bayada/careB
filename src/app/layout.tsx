@@ -3,6 +3,9 @@ import "./globals.css";
 import AuthProvider from "@/providers/AuthProvider";
 import ToastProvider from "@/providers/ToastProvider";
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 export const metadata: Metadata = {
   title: "바야다 - 신뢰할 수 있는 요양보호사 매칭 플랫폼",
   description: "믿을 수 있는 요양보호사와 보호자를 연결하는 신뢰할 수 있는 노인돌봄 플랫폼",
