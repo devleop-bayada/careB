@@ -3,6 +3,25 @@ import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
 import { updateProfileSchema } from "@/lib/validations/profile";
 
+export async function DELETE() {
+  try {
+    const { session, error } = await requireAuth();
+    if (error) return error;
+
+    const userId = (session!.user as any).id as string;
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false, isBanned: true },
+    });
+
+    return NextResponse.json({ message: "회원 탈퇴가 완료되었습니다." });
+  } catch (err) {
+    console.error("[DELETE /api/users/me]", err);
+    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
+  }
+}
+
 export async function GET() {
   const { session, error } = await requireAuth();
   if (error) return error;

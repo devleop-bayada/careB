@@ -143,7 +143,7 @@ export default async function CaregiverDetailPage({ params }: { params: { id: st
       <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
         <div className="flex gap-2">
           <Link
-            href={`/matching?caregiverId=${params.id}`}
+            href="/chat"
             className="flex items-center justify-center gap-2 flex-1 py-3 border-2 border-primary-500 text-primary-500 font-bold rounded-xl text-sm hover:bg-primary-50 transition-colors"
           >
             <MessageSquare size={16} />

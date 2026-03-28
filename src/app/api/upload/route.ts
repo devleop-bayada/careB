@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase";
 import { requireAuth } from "@/lib/auth-helpers";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { randomUUID } from "crypto";
 
 export async function POST(req: NextRequest) {
   const { session, error } = await requireAuth();
@@ -25,20 +25,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "JPG, PNG, WebP, GIF 형식만 업로드 가능합니다." }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
+    const supabase = createServiceClient();
     const ext = file.name.split(".").pop() ?? "jpg";
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    const fileName = `${randomUUID()}.${ext}`;
+    const path = `uploads/${fileName}`;
 
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(path.join(uploadDir, filename), buffer);
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-    const url = `/uploads/${filename}`;
-    return NextResponse.json({ url }, { status: 201 });
+    const { error: uploadError } = await supabase.storage
+      .from("careb-uploads")
+      .upload(path, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("[Upload Error]", uploadError);
+      return NextResponse.json({ error: "파일 업로드에 실패했습니다." }, { status: 500 });
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("careb-uploads")
+      .getPublicUrl(path);
+
+    return NextResponse.json({ url: urlData.publicUrl }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/upload]", err);
-    return NextResponse.json({ error: "파일 업로드에 실패했습니다." }, { status: 500 });
+    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
   }
 }

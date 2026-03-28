@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-import CustomDatePicker from "@/components/ui/CustomDatePicker";
 import {
   useCareRecipients,
   useCreateRecipient,
@@ -15,14 +14,14 @@ import {
 interface CareRecipient {
   id: string;
   name: string;
-  birthDate: string;
+  birthYear: number;
   gender: string;
   specialNotes?: string;
 }
 
 interface CareRecipientForm {
   name: string;
-  birthDate: string;
+  birthYear: string;
   gender: string;
   specialNotes: string;
 }
@@ -35,7 +34,7 @@ export default function CareRecipientsPage() {
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<CareRecipientForm>({ name: "", birthDate: "", gender: "MALE", specialNotes: "" });
+  const [form, setForm] = useState<CareRecipientForm>({ name: "", birthYear: "", gender: "MALE", specialNotes: "" });
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
@@ -43,7 +42,7 @@ export default function CareRecipientsPage() {
 
   function openAdd() {
     setEditingId(null);
-    setForm({ name: "", birthDate: "", gender: "MALE", specialNotes: "" });
+    setForm({ name: "", birthYear: "", gender: "MALE", specialNotes: "" });
     setShowModal(true);
   }
 
@@ -51,7 +50,7 @@ export default function CareRecipientsPage() {
     setEditingId(recipient.id);
     setForm({
       name: recipient.name,
-      birthDate: recipient.birthDate.split("T")[0],
+      birthYear: String(recipient.birthYear),
       gender: recipient.gender,
       specialNotes: recipient.specialNotes || "",
     });
@@ -59,8 +58,9 @@ export default function CareRecipientsPage() {
   }
 
   async function handleSave() {
-    if (!form.name || !form.birthDate) return;
-    const body = { name: form.name, birthDate: form.birthDate, gender: form.gender, specialNotes: form.specialNotes };
+    const birthYearNum = parseInt(form.birthYear, 10);
+    if (!form.name || !birthYearNum || isNaN(birthYearNum)) return;
+    const body = { name: form.name, birthYear: birthYearNum, gender: form.gender, specialNotes: form.specialNotes };
     if (editingId) {
       await updateRecipient.mutateAsync({ id: editingId, ...body });
     } else {
@@ -99,16 +99,14 @@ export default function CareRecipientsPage() {
         ) : (
           <div className="space-y-3">
             {recipients.map((recipient: CareRecipient) => {
-              const parsedDate = recipient.birthDate ? new Date(recipient.birthDate) : null;
-              const birthYear = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate.getFullYear() : null;
-              const age = birthYear !== null ? new Date().getFullYear() - birthYear : null;
+              const age = recipient.birthYear ? new Date().getFullYear() - recipient.birthYear : null;
               return (
                 <div key={recipient.id} className="bg-white rounded-2xl border border-gray-100 px-4 py-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">👴</span>
                     <div>
                       <p className="text-sm font-bold text-gray-900">{recipient.name}</p>
-                      <p className="text-sm text-gray-600">{age !== null && birthYear !== null ? `${age}세 (${birthYear}년생)` : "생년 정보 없음"}</p>
+                      <p className="text-sm text-gray-600">{recipient.birthYear ? `${recipient.birthYear}년생 (${age}세)` : "생년 정보 없음"}</p>
                       {recipient.specialNotes && (
                         <p className="text-xs text-gray-400 mt-0.5">{recipient.specialNotes}</p>
                       )}
@@ -147,12 +145,11 @@ export default function CareRecipientsPage() {
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">생년월일 *</label>
-                <CustomDatePicker
-                  value={form.birthDate}
-                  onChange={(val) => setForm({ ...form, birthDate: val })}
-                  placeholder="생년월일 선택"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">출생연도 *</label>
+                <input type="number" value={form.birthYear} onChange={(e) => setForm({ ...form, birthYear: e.target.value })}
+                  placeholder="예: 1945"
+                  min={1920} max={2010}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">성별</label>
@@ -173,7 +170,7 @@ export default function CareRecipientsPage() {
                   placeholder="질환, 거동 상태, 특이사항 등"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
               </div>
-              <button onClick={handleSave} disabled={saving || !form.name || !form.birthDate}
+              <button onClick={handleSave} disabled={saving || !form.name || !form.birthYear}
                 className="w-full bg-primary-500 text-white font-bold py-3.5 rounded-xl text-sm hover:bg-primary-600 transition-colors disabled:opacity-60 mt-2">
                 {saving ? "저장 중..." : "저장"}
               </button>

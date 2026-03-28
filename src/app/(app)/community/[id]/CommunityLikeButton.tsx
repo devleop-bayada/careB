@@ -22,12 +22,9 @@ export default function CommunityLikeButton({
         method: "POST",
       });
       if (res.ok) {
-        if (liked) {
-          setLikes((prev) => Math.max(0, prev - 1));
-        } else {
-          setLikes((prev) => prev + 1);
-        }
-        setLiked(!liked);
+        const data = await res.json();
+        setLiked(data.liked);
+        setLikes(data.likeCount);
       }
     } catch {
       // ignore

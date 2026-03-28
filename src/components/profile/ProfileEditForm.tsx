@@ -6,6 +6,7 @@ import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import { SERVICE_CATEGORIES } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { useUpload } from '@/hooks/useUpload';
 import { Camera } from 'lucide-react';
 import Image from 'next/image';
 import { useRef, useState } from 'react';
@@ -37,7 +38,9 @@ export default function ProfileEditForm({ role, initialValues = {}, onSubmit, lo
   const [hourlyRate, setHourlyRate] = useState(String(initialValues.hourlyRate ?? ''));
   const [selectedCareTypes, setSelectedCareTypes] = useState<string[]>(initialValues.careTypes ?? []);
   const [previewImage, setPreviewImage] = useState<string | null>(initialValues.profileImage ?? null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(initialValues.profileImage ?? null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const upload = useUpload();
 
   function toggleCareType(value: string) {
     setSelectedCareTypes((prev) =>
@@ -49,16 +52,23 @@ export default function ProfileEditForm({ role, initialValues = {}, onSubmit, lo
     e.preventDefault();
     await onSubmit?.({
       name, phone, introduction, address, bio,
+      profileImage: profileImageUrl,
       hourlyRate: hourlyRate ? Number(hourlyRate) : undefined,
       careTypes: selectedCareTypes,
     });
   }
 
-  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setPreviewImage(url);
+    const localUrl = URL.createObjectURL(file);
+    setPreviewImage(localUrl);
+    try {
+      const { url } = await upload.mutateAsync(file);
+      setProfileImageUrl(url);
+    } catch {
+      setPreviewImage(profileImageUrl);
+    }
   }
 
   return (

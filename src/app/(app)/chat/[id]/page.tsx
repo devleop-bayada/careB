@@ -9,6 +9,7 @@ import { useRealtimeChat, type RealtimeMessage } from "@/hooks/useRealtimeChat";
 import { usePresence } from "@/hooks/usePresence";
 import { useChatMessages, useSendMessage } from "@/hooks/useChat";
 import { useMatch } from "@/hooks/useMatches";
+import { useUpload } from "@/hooks/useUpload";
 
 export default function ChatRoomPage() {
   const params = useParams();
@@ -21,7 +22,10 @@ export default function ChatRoomPage() {
   const [sending, setSending] = useState(false);
   const [showAttach, setShowAttach] = useState(false);
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
+  const [attachedImageFile, setAttachedImageFile] = useState<File | null>(null);
   const [attachedFile, setAttachedFile] = useState<{ name: string; url: string } | null>(null);
+  const [attachedFileRaw, setAttachedFileRaw] = useState<File | null>(null);
+  const upload = useUpload();
   const bottomRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -86,6 +90,7 @@ export default function ChatRoomPage() {
     if (!file) return;
     const url = URL.createObjectURL(file);
     setAttachedImage(url);
+    setAttachedImageFile(file);
     setShowAttach(false);
   }
 
@@ -94,6 +99,7 @@ export default function ChatRoomPage() {
     if (!file) return;
     const url = URL.createObjectURL(file);
     setAttachedFile({ name: file.name, url });
+    setAttachedFileRaw(file);
     setShowAttach(false);
   }
 
@@ -105,9 +111,19 @@ export default function ChatRoomPage() {
 
     try {
       const payload: any = { content: message };
-      if (attachedImage) payload.imageUrl = attachedImage;
-      if (attachedFile) payload.fileUrl = attachedFile.url;
-      if (attachedFile) payload.fileName = attachedFile.name;
+
+      // Upload image via Supabase Storage
+      if (attachedImageFile) {
+        const { url } = await upload.mutateAsync(attachedImageFile);
+        payload.imageUrl = url;
+      }
+
+      // Upload file via Supabase Storage
+      if (attachedFileRaw && attachedFile) {
+        const { url } = await upload.mutateAsync(attachedFileRaw);
+        payload.fileUrl = url;
+        payload.fileName = attachedFile.name;
+      }
 
       const res = await fetch(`/api/chat/${matchId}`, {
         method: "POST",
@@ -126,7 +142,9 @@ export default function ChatRoomPage() {
 
       setMessage("");
       setAttachedImage(null);
+      setAttachedImageFile(null);
       setAttachedFile(null);
+      setAttachedFileRaw(null);
     } finally {
       setSending(false);
     }
@@ -248,7 +266,7 @@ export default function ChatRoomPage() {
             <div className="relative inline-block">
               <img src={attachedImage} alt="첨부" className="h-16 rounded-lg object-cover" />
               <button
-                onClick={() => setAttachedImage(null)}
+                onClick={() => { setAttachedImage(null); setAttachedImageFile(null); }}
                 className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-800 text-white rounded-full flex items-center justify-center"
               >
                 <X size={10} />
@@ -260,7 +278,7 @@ export default function ChatRoomPage() {
               <FileText size={14} className="text-gray-500" />
               <span className="text-xs text-gray-700">{attachedFile.name}</span>
               <button
-                onClick={() => setAttachedFile(null)}
+                onClick={() => { setAttachedFile(null); setAttachedFileRaw(null); }}
                 className="w-5 h-5 bg-gray-800 text-white rounded-full flex items-center justify-center ml-1"
               >
                 <X size={10} />
