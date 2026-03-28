@@ -9,10 +9,17 @@ interface BottomSheetProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  height?: 'auto' | 'half' | 'full';
   className?: string;
 }
 
-export default function BottomSheet({ isOpen, onClose, title, children, className }: BottomSheetProps) {
+const heightStyles = {
+  auto: 'max-h-[85vh]',
+  half: 'h-[50vh]',
+  full: 'h-[95vh]',
+};
+
+export default function BottomSheet({ isOpen, onClose, title, children, height = 'auto', className }: BottomSheetProps) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -34,7 +41,8 @@ export default function BottomSheet({ isOpen, onClose, title, children, classNam
       />
       <div
         className={cn(
-          'relative w-full max-w-[600px] bg-white rounded-t-3xl shadow-2xl',
+          'relative w-full max-w-[600px] bg-white rounded-t-3xl shadow-2xl flex flex-col',
+          heightStyles[height],
           'animate-in slide-in-from-bottom duration-300',
           className,
         )}

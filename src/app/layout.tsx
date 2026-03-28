@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import AuthProvider from "@/providers/AuthProvider";
+import QueryProvider from "@/providers/QueryProvider";
 import ToastProvider from "@/providers/ToastProvider";
 
 export const dynamic = "force-dynamic";
@@ -37,9 +38,11 @@ export default function RootLayout({
       </head>
       <body>
         <AuthProvider>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
+          <QueryProvider>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </QueryProvider>
         </AuthProvider>
       </body>
     </html>

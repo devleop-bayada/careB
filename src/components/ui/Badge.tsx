@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { HTMLAttributes } from 'react';
 
-type BadgeVariant = 'primary' | 'blue' | 'green' | 'gray' | 'red';
+type BadgeVariant = 'primary' | 'success' | 'warning' | 'danger' | 'gray' | 'blue' | 'green' | 'red';
 type BadgeSize = 'sm' | 'md';
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
@@ -11,6 +11,9 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const variantStyles: Record<BadgeVariant, string> = {
   primary: 'bg-primary-100 text-primary-700',
+  success: 'bg-green-100 text-green-700',
+  warning: 'bg-yellow-100 text-yellow-700',
+  danger: 'bg-red-100 text-red-600',
   blue: 'bg-blue-100 text-blue-700',
   green: 'bg-green-100 text-green-700',
   gray: 'bg-gray-100 text-gray-600',

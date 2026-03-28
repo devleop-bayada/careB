@@ -1,48 +1,117 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MessageSquare } from "lucide-react";
+import useSWR from "swr";
+import { supabase } from "@/lib/supabase";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 
-async function getChatRooms(userId: string, role: string) {
-  if (role === "GUARDIAN") {
-    const guardianProfile = await prisma.guardianProfile.findUnique({ where: { userId } });
-    if (!guardianProfile) return [];
-    return prisma.match.findMany({
-      where: {
-        guardianId: guardianProfile.id,
-        status: { notIn: ["REJECTED", "CANCELLED"] },
-      },
-      orderBy: { updatedAt: "desc" },
-      include: {
-        caregiver: { include: { user: { select: { id: true, name: true, profileImage: true } } } },
-        messages: { orderBy: { createdAt: "desc" }, take: 1 },
-      },
-    });
-  } else {
-    const caregiverProfile = await prisma.caregiverProfile.findUnique({ where: { userId } });
-    if (!caregiverProfile) return [];
-    return prisma.match.findMany({
-      where: {
-        caregiverId: caregiverProfile.id,
-        status: { notIn: ["REJECTED", "CANCELLED"] },
-      },
-      orderBy: { updatedAt: "desc" },
-      include: {
-        guardian: { include: { user: { select: { id: true, name: true, profileImage: true } } } },
-        messages: { orderBy: { createdAt: "desc" }, take: 1 },
-      },
-    });
-  }
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
+interface ChatRoom {
+  id: string;
+  status: string;
+  lastMessage: any;
+  updatedAt: string;
+  partner: {
+    id: string;
+    name: string;
+    profileImage: string | null;
+  } | null;
+  unreadCount?: number;
 }
 
-export default async function ChatPage() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) redirect("/login");
-  const user = session.user as any;
+export default function ChatPage() {
+  const { data: session, status: authStatus } = useSession();
+  const router = useRouter();
+  const user = session?.user as any;
 
-  const matches = await getChatRooms(user.id, user.role);
+  const { data, mutate } = useSWR(
+    user ? "/api/chat" : null,
+    fetcher
+  );
+
+  const [rooms, setRooms] = useState<ChatRoom[]>([]);
+
+  // Sync SWR data into local state
+  useEffect(() => {
+    if (data?.rooms) {
+      setRooms(data.rooms);
+    }
+  }, [data]);
+
+  // Subscribe to all InterviewMessage inserts to update chat list in real-time
+  useEffect(() => {
+    if (!user) return;
+
+    let channel: RealtimeChannel | null = null;
+
+    try {
+      channel = supabase
+        .channel("chat-list")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "InterviewMessage",
+          },
+          (payload) => {
+            const newMsg = payload.new as any;
+
+            setRooms((prev) => {
+              const idx = prev.findIndex((r) => r.id === newMsg.matchId);
+              if (idx === -1) {
+                // Unknown match - refetch to get full data
+                mutate();
+                return prev;
+              }
+
+              const updated = [...prev];
+              const room = { ...updated[idx] };
+              room.lastMessage = newMsg;
+              room.updatedAt = newMsg.createdAt;
+
+              // Increment unread count if message is from the other user
+              if (newMsg.senderId !== user.id) {
+                room.unreadCount = (room.unreadCount || 0) + 1;
+              }
+
+              // Move to top
+              updated.splice(idx, 1);
+              updated.unshift(room);
+              return updated;
+            });
+          }
+        )
+        .subscribe();
+    } catch (err) {
+      console.error("[ChatPage] realtime subscription error:", err);
+    }
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [user, mutate]);
+
+  if (authStatus === "loading" || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (authStatus === "unauthenticated") {
+    router.push("/login");
+    return null;
+  }
+
   const isGuardian = user.role === "GUARDIAN";
 
   return (
@@ -51,7 +120,7 @@ export default async function ChatPage() {
         <h1 className="text-base font-bold text-gray-900">채팅</h1>
       </div>
 
-      {matches.length === 0 ? (
+      {rooms.length === 0 && data ? (
         <div className="flex flex-col items-center justify-center flex-1 py-20">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <MessageSquare size={28} className="text-gray-300" />
@@ -67,11 +136,12 @@ export default async function ChatPage() {
         </div>
       ) : (
         <div className="divide-y divide-gray-100 bg-white">
-          {matches.map((match: any) => {
-            const other = isGuardian ? match.caregiver?.user : match.guardian?.user;
-            const lastMessage = match.messages?.[0];
+          {rooms.map((room: ChatRoom) => {
+            const other = room.partner;
+            const lastMessage = room.lastMessage;
+            const unread = room.unreadCount || 0;
             return (
-              <Link key={match.id} href={`/chat/${match.id}`}>
+              <Link key={room.id} href={`/chat/${room.id}`}>
                 <div className="flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors">
                   <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {other?.profileImage ? (
@@ -83,19 +153,28 @@ export default async function ChatPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-bold text-gray-900">{other?.name}</p>
-                      {lastMessage && (
-                        <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
-                          {new Date(lastMessage.createdAt).toLocaleDateString("ko-KR", {
-                            month: "short", day: "numeric",
-                          })}
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                        {lastMessage && (
+                          <span className="text-xs text-gray-400">
+                            {new Date(lastMessage.createdAt).toLocaleDateString("ko-KR", {
+                              month: "short", day: "numeric",
+                            })}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-0.5">
+                      {lastMessage ? (
+                        <p className="text-xs text-gray-500 truncate flex-1">{lastMessage.content}</p>
+                      ) : (
+                        <p className="text-xs text-gray-400">채팅을 시작해보세요</p>
+                      )}
+                      {unread > 0 && (
+                        <span className="ml-2 min-w-[20px] h-5 bg-primary-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1.5 flex-shrink-0">
+                          {unread > 99 ? "99+" : unread}
                         </span>
                       )}
                     </div>
-                    {lastMessage ? (
-                      <p className="text-xs text-gray-500 mt-0.5 truncate">{lastMessage.content}</p>
-                    ) : (
-                      <p className="text-xs text-gray-400 mt-0.5">채팅을 시작해보세요</p>
-                    )}
                   </div>
                 </div>
               </Link>

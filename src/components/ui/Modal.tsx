@@ -9,10 +9,17 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
-export default function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
+const sizeStyles = {
+  sm: 'max-w-[360px]',
+  md: 'max-w-[480px]',
+  lg: 'max-w-[600px]',
+};
+
+export default function Modal({ isOpen, onClose, title, children, size = 'lg', className }: ModalProps) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -27,27 +34,24 @@ export default function Modal({ isOpen, onClose, title, children, className }: M
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
-      {/* Sheet */}
+      {/* Dialog */}
       <div
         className={cn(
-          'relative w-full max-w-[600px] bg-white rounded-t-3xl shadow-xl',
+          'relative w-full bg-white rounded-2xl shadow-xl',
+          sizeStyles[size],
           'animate-in slide-in-from-bottom duration-300',
           className,
         )}
       >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 bg-gray-200 rounded-full" />
-        </div>
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
             <button
               onClick={onClose}

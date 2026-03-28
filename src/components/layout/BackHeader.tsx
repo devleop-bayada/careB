@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
 interface BackHeaderProps {
-  title: string;
+  title: React.ReactNode;
   fallbackHref?: string;
 }
 

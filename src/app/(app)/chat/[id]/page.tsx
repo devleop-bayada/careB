@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, Send, ImagePlus, Paperclip, FileText, X } from "lucide-react";
-import useSWR from "swr";
+import { Send, ImagePlus, Paperclip, FileText, X, Circle } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { useRealtimeChat, type RealtimeMessage } from "@/hooks/useRealtimeChat";
+import { usePresence } from "@/hooks/usePresence";
+import { useChatMessages, useSendMessage } from "@/hooks/useChat";
+import { useMatch } from "@/hooks/useMatches";
 
 export default function ChatRoomPage() {
   const params = useParams();
@@ -25,23 +26,60 @@ export default function ChatRoomPage() {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data, mutate } = useSWR(`/api/chat/${matchId}`, fetcher, {
-    refreshInterval: 3000,
-  });
+  // Fetch initial messages via React Query (no polling - realtime handles updates)
+  const { messages: initialMessages, isLoading } = useChatMessages(matchId);
+  const [messages, setMessages] = useState<any[]>([]);
 
-  const messages = data?.messages || [];
-
+  // Sync React Query data into local state
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages]);
 
-  // Fetch match info separately for other party name
-  const { data: matchData } = useSWR(`/api/matches/${matchId}`, fetcher);
-  const match = matchData?.match;
+  // Fetch match info for other party name
+  const { match } = useMatch(matchId);
   const isGuardian = currentUser?.role === "GUARDIAN";
   const otherUser = isGuardian
     ? match?.caregiver?.user
     : match?.guardian?.user;
+
+  // --- Realtime: new messages ---
+  const handleRealtimeMessage = useCallback(
+    (payload: RealtimeMessage) => {
+      setMessages((prev) => {
+        // Check for duplicates (message might already exist from optimistic update)
+        if (prev.some((m) => m.id === payload.id)) {
+          // If it's an update (e.g. read receipt), replace the existing message
+          return prev.map((m) => (m.id === payload.id ? { ...m, ...payload } : m));
+        }
+        return [...prev, payload];
+      });
+    },
+    []
+  );
+
+  useRealtimeChat(matchId, handleRealtimeMessage);
+
+  // --- Presence: online & typing ---
+  const { onlineUsers, typingUsers, setTyping } = usePresence(matchId, currentUser?.id);
+  const isOtherOnline = otherUser?.id ? onlineUsers.includes(otherUser.id) : false;
+  const isOtherTyping = otherUser?.id ? typingUsers.includes(otherUser.id) : false;
+
+  // Auto-scroll on new message
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isOtherTyping]);
+
+  // Handle typing indicator
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setMessage(e.target.value);
+    if (e.target.value.trim()) {
+      setTyping(true);
+    } else {
+      setTyping(false);
+    }
+  }
 
   function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -63,27 +101,38 @@ export default function ChatRoomPage() {
     e.preventDefault();
     if ((!message.trim() && !attachedImage && !attachedFile) || sending) return;
     setSending(true);
+    setTyping(false);
+
     try {
       const payload: any = { content: message };
       if (attachedImage) payload.imageUrl = attachedImage;
       if (attachedFile) payload.fileUrl = attachedFile.url;
       if (attachedFile) payload.fileName = attachedFile.name;
 
-      await fetch(`/api/chat/${matchId}`, {
+      const res = await fetch(`/api/chat/${matchId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
+      if (res.ok) {
+        const { message: newMsg } = await res.json();
+        // Optimistic: add immediately (realtime will deduplicate)
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === newMsg.id)) return prev;
+          return [...prev, newMsg];
+        });
+      }
+
       setMessage("");
       setAttachedImage(null);
       setAttachedFile(null);
-      mutate();
     } finally {
       setSending(false);
     }
   }
 
-  if (!data) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
@@ -93,7 +142,17 @@ export default function ChatRoomPage() {
 
   return (
     <div className="flex flex-col bg-gray-50" style={{ height: "calc(100vh - 4rem)" }}>
-      <BackHeader title={otherUser?.name ?? "채팅"} fallbackHref="/chat" />
+      <BackHeader
+        title={
+          <div className="flex items-center gap-2">
+            <span>{otherUser?.name ?? "채팅"}</span>
+            {isOtherOnline && (
+              <Circle size={8} className="fill-green-500 text-green-500" />
+            )}
+          </div>
+        }
+        fallbackHref="/chat"
+      />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
@@ -144,13 +203,41 @@ export default function ChatRoomPage() {
                   {msg.content}
                 </div>
                 )}
-                <span className="text-[10px] text-gray-400 px-1">
-                  {new Date(msg.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
-                </span>
+                <div className="flex items-center gap-1 px-1">
+                  <span className="text-[10px] text-gray-400">
+                    {new Date(msg.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                  {isMine && (
+                    <span className={`text-[10px] ${msg.isRead ? "text-primary-500" : "text-gray-300"}`}>
+                      {msg.isRead ? "읽음" : "전송됨"}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           );
         })}
+
+        {/* Typing indicator */}
+        {isOtherTyping && (
+          <div className="flex justify-start">
+            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2 flex-shrink-0 self-end overflow-hidden">
+              {otherUser?.profileImage ? (
+                <img src={otherUser.profileImage} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xs font-bold text-gray-500">{otherUser?.name?.[0]}</span>
+              )}
+            </div>
+            <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm px-4 py-3">
+              <div className="flex gap-1">
+                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+              </div>
+            </div>
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
@@ -219,7 +306,7 @@ export default function ChatRoomPage() {
           <input
             type="text"
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleInputChange}
             placeholder="메시지를 입력하세요..."
             className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400"
           />

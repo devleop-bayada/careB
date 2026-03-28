@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import CustomDatePicker from "@/components/ui/CustomDatePicker";
+import {
+  useCareRecipients,
+  useCreateRecipient,
+  useUpdateRecipient,
+  useDeleteRecipient,
+} from "@/hooks/useCareRecipients";
 
 interface CareRecipient {
   id: string;
@@ -22,27 +28,18 @@ interface CareRecipientForm {
 }
 
 export default function CareRecipientsPage() {
-  const [recipients, setRecipients] = useState<CareRecipient[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { recipients, isLoading } = useCareRecipients();
+  const createRecipient = useCreateRecipient();
+  const updateRecipient = useUpdateRecipient();
+  const deleteRecipient = useDeleteRecipient();
+
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<CareRecipientForm>({ name: "", birthDate: "", gender: "MALE", specialNotes: "" });
-  const [saving, setSaving] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  useEffect(() => { fetchRecipients(); }, []);
-
-  async function fetchRecipients() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/care-recipients");
-      const data = await res.json();
-      setRecipients(data.recipients || []);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const saving = createRecipient.isPending || updateRecipient.isPending;
 
   function openAdd() {
     setEditingId(null);
@@ -63,27 +60,13 @@ export default function CareRecipientsPage() {
 
   async function handleSave() {
     if (!form.name || !form.birthDate) return;
-    setSaving(true);
-    try {
-      const body = { name: form.name, birthDate: form.birthDate, gender: form.gender, specialNotes: form.specialNotes };
-      if (editingId) {
-        await fetch(`/api/care-recipients/${editingId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-      } else {
-        await fetch("/api/care-recipients", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-      }
-      setShowModal(false);
-      fetchRecipients();
-    } finally {
-      setSaving(false);
+    const body = { name: form.name, birthDate: form.birthDate, gender: form.gender, specialNotes: form.specialNotes };
+    if (editingId) {
+      await updateRecipient.mutateAsync({ id: editingId, ...body });
+    } else {
+      await createRecipient.mutateAsync(body);
     }
+    setShowModal(false);
   }
 
   function requestDelete(id: string) {
@@ -93,9 +76,8 @@ export default function CareRecipientsPage() {
 
   async function handleDelete() {
     if (!deleteTargetId) return;
-    await fetch(`/api/care-recipients/${deleteTargetId}`, { method: "DELETE" });
+    await deleteRecipient.mutateAsync(deleteTargetId);
     setDeleteTargetId(null);
-    fetchRecipients();
   }
 
   return (
@@ -103,7 +85,7 @@ export default function CareRecipientsPage() {
       <BackHeader title="어르신 관리" fallbackHref="/my" />
 
       <div className="px-4 py-4">
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center py-10">
             <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
           </div>
@@ -116,7 +98,7 @@ export default function CareRecipientsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {recipients.map((recipient) => {
+            {recipients.map((recipient: CareRecipient) => {
               const birthYear = new Date(recipient.birthDate).getFullYear();
               const age = new Date().getFullYear() - birthYear;
               return (
