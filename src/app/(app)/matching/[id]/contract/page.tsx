@@ -3,16 +3,17 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { FileText, CheckCircle, Clock, PenTool } from "lucide-react";
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
 import BackHeader from "@/components/layout/BackHeader";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function ContractPage() {
   const params = useParams();
   const matchId = params.id as string;
 
-  const { data: matchData } = useSWR(`/api/matches/${matchId}`, fetcher);
+  const { data: matchData } = useQuery({
+    queryKey: ["match", matchId],
+    queryFn: () => fetch(`/api/matches/${matchId}`).then((r) => r.json()),
+  });
   const match = matchData?.match;
 
   const [guardianSigned, setGuardianSigned] = useState(false);

@@ -5,11 +5,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MessageSquare } from "lucide-react";
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 interface ChatRoom {
   id: string;
@@ -29,14 +27,15 @@ export default function ChatPage() {
   const router = useRouter();
   const user = session?.user as any;
 
-  const { data, mutate } = useSWR(
-    user ? "/api/chat" : null,
-    fetcher
-  );
+  const { data, refetch } = useQuery({
+    queryKey: ["chatList"],
+    queryFn: () => fetch("/api/chat").then((r) => r.json()),
+    enabled: !!user,
+  });
 
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
 
-  // Sync SWR data into local state
+  // Sync query data into local state
   useEffect(() => {
     if (data?.rooms) {
       setRooms(data.rooms);
@@ -66,7 +65,7 @@ export default function ChatPage() {
               const idx = prev.findIndex((r) => r.id === newMsg.matchId);
               if (idx === -1) {
                 // Unknown match - refetch to get full data
-                mutate();
+                refetch();
                 return prev;
               }
 
@@ -97,7 +96,7 @@ export default function ChatPage() {
         supabase.removeChannel(channel);
       }
     };
-  }, [user, mutate]);
+  }, [user, refetch]);
 
   if (authStatus === "loading" || !user) {
     return (
