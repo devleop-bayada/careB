@@ -45,8 +45,19 @@ export default async function CaregiverDetailPage({ params }: { params: { id: st
   })();
 
   const CARE_LABELS: Record<string, string> = {
-    HOME_CARE: "방문요양", BATH_CARE: "방문목욕",
-    NURSING: "방문간호", COGNITIVE: "인지활동", HOUSEKEEPING: "가사지원",
+    HOME_CARE: "방문요양",
+    HOME_BATH: "방문목욕",
+    HOME_NURSING: "방문간호",
+    DAY_NIGHT_CARE: "주야간보호",
+    SHORT_TERM_CARE: "단기보호",
+    HOURLY_CARE: "시간제돌봄",
+    HOSPITAL_CARE: "병원간병",
+    DEMENTIA_CARE: "치매전문",
+    HOSPICE_CARE: "임종돌봄",
+    BATH_CARE: "방문목욕",
+    NURSING: "방문간호",
+    COGNITIVE: "인지활동",
+    HOUSEKEEPING: "가사지원",
   };
 
   return (

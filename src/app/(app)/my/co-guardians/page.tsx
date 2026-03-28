@@ -127,6 +127,12 @@ export default function CoGuardiansPage() {
             <Users size={40} className="text-gray-200 mb-3" />
             <p className="text-gray-500 font-medium">공동보호자가 없어요</p>
             <p className="text-sm text-gray-400 mt-1">가족을 초대하여 함께 돌봄을 관리하세요</p>
+            <button
+              onClick={() => setShowInviteForm(true)}
+              className="mt-4 bg-primary-500 text-white text-sm font-semibold px-5 py-2.5 rounded-full"
+            >
+              공동보호자 초대하기
+            </button>
           </div>
         ) : (
           coGuardians.map((cg) => (

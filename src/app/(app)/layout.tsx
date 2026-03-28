@@ -122,7 +122,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   // 탭 페이지에서만 로고 헤더 표시 (하위 페이지는 BackHeader 사용)
-  const TAB_PAGES = ["/home", "/search", "/community", "/chat", "/my", "/care", "/matching", "/notifications"];
+  const TAB_PAGES = ["/home", "/search", "/community", "/chat", "/my", "/care", "/matching"];
   const isTabPage = TAB_PAGES.some((tab) => pathname === tab || pathname === tab + "/caregiver" || pathname === tab + "/guardian");
   const showTopHeader = isTabPage;
 

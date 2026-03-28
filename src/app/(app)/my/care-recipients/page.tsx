@@ -99,15 +99,16 @@ export default function CareRecipientsPage() {
         ) : (
           <div className="space-y-3">
             {recipients.map((recipient: CareRecipient) => {
-              const birthYear = new Date(recipient.birthDate).getFullYear();
-              const age = new Date().getFullYear() - birthYear;
+              const parsedDate = recipient.birthDate ? new Date(recipient.birthDate) : null;
+              const birthYear = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate.getFullYear() : null;
+              const age = birthYear !== null ? new Date().getFullYear() - birthYear : null;
               return (
                 <div key={recipient.id} className="bg-white rounded-2xl border border-gray-100 px-4 py-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">👴</span>
                     <div>
                       <p className="text-sm font-bold text-gray-900">{recipient.name}</p>
-                      <p className="text-sm text-gray-600">{age}세 ({birthYear}년생)</p>
+                      <p className="text-sm text-gray-600">{age !== null && birthYear !== null ? `${age}세 (${birthYear}년생)` : "생년 정보 없음"}</p>
                       {recipient.specialNotes && (
                         <p className="text-xs text-gray-400 mt-0.5">{recipient.specialNotes}</p>
                       )}
