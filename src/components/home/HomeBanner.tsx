@@ -8,7 +8,7 @@ interface HomeBannerProps {
 
 export default function HomeBanner({
   title = '믿을 수 있는 요양보호사를\n지금 바로 찾아보세요',
-  subtitle = '바야다와 함께하는 어르신 돌봄',
+  subtitle = 'CareB와 함께하는 어르신 돌봄',
   className,
 }: HomeBannerProps) {
   return (

@@ -7,8 +7,17 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 export const metadata: Metadata = {
-  title: "바야다 - 신뢰할 수 있는 요양보호사 매칭 플랫폼",
+  title: "CareB(케어비) - 신뢰할 수 있는 요양보호사 매칭 플랫폼",
   description: "믿을 수 있는 요양보호사와 보호자를 연결하는 신뢰할 수 있는 노인돌봄 플랫폼",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/icon.png",
+  },
+  openGraph: {
+    title: "CareB(케어비) - 어르신의 내일을, 믿음으로 잇다",
+    description: "믿을 수 있는 요양보호사와 보호자를 연결하는 신뢰할 수 있는 노인돌봄 플랫폼",
+    images: ["/icon.png"],
+  },
 };
 
 export default function RootLayout({

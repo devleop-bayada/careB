@@ -25,7 +25,7 @@ const STATS = [
 const TESTIMONIALS = [
   {
     name: "김O자 보호자",
-    text: "어머니 방문요양 서비스를 바야다에서 찾았어요. 꼼꼼한 검증 덕분에 안심하고 맡길 수 있었습니다.",
+    text: "어머니 방문요양 서비스를 CareB에서 찾았어요. 꼼꼼한 검증 덕분에 안심하고 맡길 수 있었습니다.",
     rating: 5,
   },
   {
@@ -52,10 +52,8 @@ export default async function LandingPage() {
         {/* Header */}
         <header className="flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-500 rounded-xl flex items-center justify-center">
-              <span className="text-white text-base font-black">바</span>
-            </div>
-            <span className="text-primary-500 font-black text-xl tracking-tight">바야다</span>
+            <img src="/icon.png" alt="CareB" className="w-8 h-8 rounded-xl" />
+            <span className="text-primary-500 font-black text-xl tracking-tight">CareB</span>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm text-gray-600 font-medium hover:text-gray-900">
@@ -69,6 +67,7 @@ export default async function LandingPage() {
             </Link>
           </div>
         </header>
+
 
         {/* Hero Section */}
         <section className="relative mx-4 rounded-3xl overflow-hidden bg-gradient-to-br from-primary-500 via-primary-400 to-primary-400 p-8 mt-2">
@@ -180,7 +179,7 @@ export default async function LandingPage() {
 
         {/* Footer */}
         <footer className="border-t border-gray-100 px-5 py-6 text-center">
-          <p className="text-xs text-gray-400">© 2025 바야다. All rights reserved.</p>
+          <p className="text-xs text-gray-400">© 2025 CareB. All rights reserved.</p>
           <div className="flex justify-center gap-4 mt-2">
             <Link href="#" className="text-xs text-gray-400 hover:text-gray-600">이용약관</Link>
             <Link href="#" className="text-xs text-gray-400 hover:text-gray-600">개인정보처리방침</Link>

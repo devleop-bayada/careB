@@ -100,7 +100,7 @@ export default async function MyPage() {
             <HelpCircle size={20} className="text-primary-500" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold text-gray-900">바야다 고객센터</p>
+            <p className="text-sm font-bold text-gray-900">CareB 고객센터</p>
             <p className="text-xs text-gray-500 mt-0.5">평일 09:00 ~ 18:00 (공휴일 제외)</p>
           </div>
           <a href="tel:1588-0000" className="text-sm font-bold text-primary-500">1588-0000</a>
@@ -108,7 +108,7 @@ export default async function MyPage() {
       </div>
 
       <div className="px-4 py-6 text-center">
-        <p className="text-xs text-gray-400">바야다 v1.0.0</p>
+        <p className="text-xs text-gray-400">CareB v1.0.0</p>
         <div className="flex justify-center gap-4 mt-2">
           <Link href="#" className="text-xs text-gray-400 hover:text-gray-600">이용약관</Link>
           <Link href="#" className="text-xs text-gray-400 hover:text-gray-600">개인정보처리방침</Link>

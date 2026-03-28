@@ -127,10 +127,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Top Header */}
         <header className="sticky top-0 z-40 bg-white border-b border-gray-100 flex items-center justify-between px-4 h-14">
           <Link href="/home" className="flex items-center gap-1.5">
-            <div className="w-7 h-7 bg-primary-500 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-black">바</span>
-            </div>
-            <span className="text-primary-500 font-black text-lg tracking-tight">바야다</span>
+            <img src="/icon.png" alt="CareB" className="w-7 h-7 rounded-lg" />
+            <span className="text-primary-500 font-black text-lg tracking-tight">CareB</span>
           </Link>
           <Link href="/notifications" className="relative p-2 hover:bg-gray-50 rounded-full">
             <Bell size={22} className="text-gray-700" />

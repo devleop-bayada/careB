@@ -103,7 +103,7 @@ export default function SettingsPage() {
         <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">고객센터</p>
         <div className="bg-white divide-y divide-gray-50">
           <div className="flex items-center justify-between px-4 py-4">
-            <span className="text-sm font-medium text-gray-900">바야다 고객센터</span>
+            <span className="text-sm font-medium text-gray-900">CareB 고객센터</span>
             <a href="tel:1588-0000" className="text-sm font-bold text-primary-500">1588-0000</a>
           </div>
           <div className="px-4 py-3">

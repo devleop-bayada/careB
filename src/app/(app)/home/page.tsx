@@ -316,7 +316,7 @@ export default async function HomePage() {
 
       {/* Trust Section */}
       <section className="mx-4 mt-6 mb-4">
-        <h2 className="text-base font-bold text-gray-900 mb-3">바야다가 특별한 이유</h2>
+        <h2 className="text-base font-bold text-gray-900 mb-3">CareB가 특별한 이유</h2>
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-white border border-gray-100 rounded-xl p-4">
             <div className="w-9 h-9 bg-primary-50 rounded-lg flex items-center justify-center mb-2">
