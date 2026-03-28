@@ -31,7 +31,7 @@ async function main() {
   await prisma.user.deleteMany();
 
   // Admin user
-  const adminHash = await bcrypt.hash("admin123", 12);
+  const adminHash = await bcrypt.hash("qwer1234!!", 12);
   const admin = await prisma.user.create({
     data: {
       phone: "010-0000-0000",
@@ -45,7 +45,7 @@ async function main() {
   console.log("Created admin:", admin.phone);
 
   // Guardian users
-  const guardianHash = await bcrypt.hash("guardian123", 12);
+  const guardianHash = await bcrypt.hash("qwer1234!!", 12);
 
   const guardian1 = await prisma.user.create({
     data: {
@@ -194,7 +194,7 @@ async function main() {
   console.log("Created 4 care recipients");
 
   // Caregiver users
-  const caregiverHash = await bcrypt.hash("caregiver123", 12);
+  const caregiverHash = await bcrypt.hash("qwer1234!!", 12);
 
   const caregiver1 = await prisma.user.create({
     data: {
@@ -1218,7 +1218,7 @@ async function main() {
   console.log("Updated certificate certType and step fields");
 
   // ─── 김영민 계정 (보호자 + 요양보호사 둘 다) ───
-  const ymHash = await bcrypt.hash("password123", 12);
+  const ymHash = await bcrypt.hash("qwer1234!!", 12);
 
   const ymGuardian = await prisma.user.create({
     data: {
@@ -1256,17 +1256,17 @@ async function main() {
 
   console.log("\nSeed completed successfully!");
   console.log("\nLogin credentials (전화번호 로그인):");
-  console.log("  Admin:      010-0000-0000 / admin123");
-  console.log("  Guardian1:  010-1234-5678 / guardian123  (김영숙, 서울 강남구)");
-  console.log("  Guardian2:  010-2345-6789 / guardian123  (박정수, 서울 서초구)");
-  console.log("  Guardian3:  010-3456-7890 / guardian123  (이현주, 경기 성남시)");
-  console.log("  Caregiver1: 010-4567-8901 / caregiver123  (최순자, 요양보호사/치매전문)");
-  console.log("  Caregiver2: 010-5678-9012 / caregiver123  (정미경, 간호조무사/뇌졸중재활)");
-  console.log("  Caregiver3: 010-6789-0123 / caregiver123  (한영희, 요양보호사/방문요양)");
-  console.log("  Caregiver4: 010-7890-1234 / caregiver123  (오정민, 요양보호사/남성전문)");
-  console.log("  Caregiver5: 010-8901-2345 / caregiver123  (윤은정, 사회복지사/호스피스)");
-  console.log("  김영민(보호자):    010-8720-8257 / password123");
-  console.log("  김영민(요양보호사): 010-8720-8258 / password123");
+  console.log("  Admin:      010-0000-0000 / qwer1234!!");
+  console.log("  Guardian1:  010-1234-5678 / qwer1234!!  (김영숙, 서울 강남구)");
+  console.log("  Guardian2:  010-2345-6789 / qwer1234!!  (박정수, 서울 서초구)");
+  console.log("  Guardian3:  010-3456-7890 / qwer1234!!  (이현주, 경기 성남시)");
+  console.log("  Caregiver1: 010-4567-8901 / qwer1234!!  (최순자, 요양보호사/치매전문)");
+  console.log("  Caregiver2: 010-5678-9012 / qwer1234!!  (정미경, 간호조무사/뇌졸중재활)");
+  console.log("  Caregiver3: 010-6789-0123 / qwer1234!!  (한영희, 요양보호사/방문요양)");
+  console.log("  Caregiver4: 010-7890-1234 / qwer1234!!  (오정민, 요양보호사/남성전문)");
+  console.log("  Caregiver5: 010-8901-2345 / qwer1234!!  (윤은정, 사회복지사/호스피스)");
+  console.log("  김영민(보호자):    010-8720-8257 / qwer1234!!");
+  console.log("  김영민(요양보호사): 010-8720-8258 / qwer1234!!");
   console.log("\nNew seed data summary:");
   console.log("  MatchRecipient: 2 (match1->김말순, match2->이옥분)");
   console.log("  Contract: 2 (ACTIVE, PENDING_SIGN)");
