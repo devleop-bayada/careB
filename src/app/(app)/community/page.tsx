@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { MessageSquare, Heart, PenSquare, Search, Eye, ArrowUpDown } from "lucide-react";
+import Badge from "@/components/ui/Badge";
+import EmptyState from "@/components/ui/EmptyState";
 import CommunityTabs from "./CommunityTabs";
 import CommunitySearch from "./CommunitySearch";
 
@@ -52,19 +54,19 @@ export default async function CommunityPage({
       {/* Posts */}
       <div className="px-4 py-3 space-y-2">
         {posts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <MessageSquare size={40} className="text-gray-200 mb-3" />
-            <p className="text-gray-500 font-medium">아직 게시글이 없어요</p>
-            <p className="text-sm text-gray-400 mt-1">첫 글을 작성해보세요!</p>
-          </div>
+          <EmptyState
+            icon={<MessageSquare size={40} />}
+            title="아직 게시글이 없어요"
+            description="첫 글을 작성해보세요!"
+          />
         ) : (
           posts.map((post: any) => (
             <Link key={post.id} href={`/community/${post.id}`}>
               <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition-shadow">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs bg-primary-100 text-primary-600 font-semibold px-2 py-0.5 rounded-full">
+                  <Badge variant="primary" size="sm">
                     {CATEGORY_LABELS[post.category] || post.category}
-                  </span>
+                  </Badge>
                 </div>
                 <h2 className="text-sm font-bold text-gray-900 line-clamp-2">{post.title}</h2>
                 {post.content && (

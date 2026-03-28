@@ -6,6 +6,9 @@ import {
   User, Star, CreditCard, Baby, Shield, Calendar, DollarSign,
   Bell, HelpCircle, ChevronRight, LogOut, Heart, Users
 } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
+import Badge from "@/components/ui/Badge";
+import ListItem from "@/components/ui/ListItem";
 import MyPageSignOut from "./MyPageSignOut";
 
 export default async function MyPage() {
@@ -44,21 +47,13 @@ export default async function MyPage() {
       {/* Profile Card */}
       <div className="bg-white px-4 py-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {user.image ? (
-              <img src={user.image} alt={user.name || ""} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-2xl font-bold text-primary-500">{user.name?.[0]}</span>
-            )}
-          </div>
+          <Avatar src={user.image} name={user.name} size="lg" />
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-lg font-black text-gray-900">{user.name}</h1>
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                isGuardian ? "bg-primary-100 text-primary-600" : "bg-blue-100 text-blue-600"
-              }`}>
+              <Badge variant={isGuardian ? "primary" : "blue"} size="sm">
                 {isGuardian ? "보호자 회원" : "요양보호사 회원"}
-              </span>
+              </Badge>
             </div>
             <p className="text-sm text-gray-500 mt-0.5">{user.phone}</p>
           </div>
@@ -70,22 +65,14 @@ export default async function MyPage() {
 
       {/* Menu Items */}
       <div className="mt-2 bg-white divide-y divide-gray-50">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link key={item.href} href={item.href}>
-              <div className="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center">
-                    <Icon size={16} className="text-gray-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-900">{item.label}</span>
-                </div>
-                <ChevronRight size={16} className="text-gray-300" />
-              </div>
-            </Link>
-          );
-        })}
+        {menuItems.map((item) => (
+          <ListItem
+            key={item.href}
+            icon={item.icon}
+            title={item.label}
+            href={item.href}
+          />
+        ))}
       </div>
 
       {/* Sign Out */}

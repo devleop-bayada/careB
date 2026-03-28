@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { Calendar, ChevronRight } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
+import Badge from "@/components/ui/Badge";
+import EmptyState from "@/components/ui/EmptyState";
 import CareTabs from "./CareTabs";
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -67,17 +70,15 @@ export default async function CarePage({
 
       <div className="px-4 py-4 space-y-3">
         {sessions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Calendar size={40} className="text-gray-200 mb-3" />
-            <p className="text-gray-500 font-medium">
-              {tab === "SCHEDULED" ? "예정된 돌봄이 없습니다" :
-               tab === "IN_PROGRESS" ? "진행 중인 돌봄이 없습니다" :
-               tab === "COMPLETED" ? "완료된 돌봄이 없습니다" : "진행 중인 돌봄이 없습니다"}
-            </p>
-            <p className="text-sm text-gray-400 mt-1 text-center leading-relaxed">
-              요양보호사와 매칭 후 돌봄 서비스가 시작됩니다
-            </p>
-          </div>
+          <EmptyState
+            icon={<Calendar size={40} />}
+            title={
+              tab === "SCHEDULED" ? "예정된 돌봄이 없습니다" :
+              tab === "IN_PROGRESS" ? "진행 중인 돌봄이 없습니다" :
+              tab === "COMPLETED" ? "완료된 돌봄이 없습니다" : "진행 중인 돌봄이 없습니다"
+            }
+            description="요양보호사와 매칭 후 돌봄 서비스가 시작됩니다"
+          />
         ) : (
           sessions.map((cs: any) => {
             const otherName = isCaregiver
@@ -94,13 +95,7 @@ export default async function CarePage({
                 <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition-shadow">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                        {otherImage ? (
-                          <img src={otherImage} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-sm font-bold text-gray-500">{otherName?.[0]}</span>
-                        )}
-                      </div>
+                      <Avatar src={otherImage} name={otherName} size="md" />
                       <div>
                         <p className="text-sm font-bold text-gray-900">{otherName}</p>
                         <p className="text-xs text-gray-500 mt-0.5">
@@ -111,15 +106,13 @@ export default async function CarePage({
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${status.color}`}>
+                      <Badge className={status.color} size="sm">
                         {status.label}
-                      </span>
+                      </Badge>
                       {isCaregiver && cs.status === "COMPLETED" && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                          hasJournal ? "bg-green-50 text-green-600" : "bg-primary-50 text-primary-600"
-                        }`}>
+                        <Badge variant={hasJournal ? "success" : "primary"} size="sm">
                           {hasJournal ? "일지 작성됨" : "일지 미작성"}
-                        </span>
+                        </Badge>
                       )}
                     </div>
                   </div>

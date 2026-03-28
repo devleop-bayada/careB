@@ -1,6 +1,11 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { Star, MapPin, CheckCircle, ChevronRight } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
+import StarRating from "@/components/ui/StarRating";
+import Badge from "@/components/ui/Badge";
+import Tag from "@/components/ui/Tag";
+import EmptyState from "@/components/ui/EmptyState";
 import CaregiverSearchFilters from "./CaregiverSearchFilters";
 
 async function getCaregivers(searchParams: Record<string, string>) {
@@ -45,11 +50,11 @@ export default async function CaregiverSearchPage({
         </p>
 
         {caregivers.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Star size={40} className="text-gray-200 mb-3" />
-            <p className="text-gray-500 font-medium">검색 조건에 맞는 요양보호사가 없습니다</p>
-            <p className="text-sm text-gray-400 mt-1">필터를 조정해 보세요</p>
-          </div>
+          <EmptyState
+            icon={<Star size={40} />}
+            title="검색 조건에 맞는 요양보호사가 없습니다"
+            description="필터를 조정해 보세요"
+          />
         ) : (
           <div className="space-y-3">
             {caregivers.map((caregiver: any) => {
@@ -67,13 +72,7 @@ export default async function CaregiverSearchPage({
                 <Link key={caregiver.id} href={`/caregiver/${caregiver.id}`}>
                   <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-start gap-3">
-                      <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {caregiver.user?.profileImage ? (
-                          <img src={caregiver.user.profileImage} alt={caregiver.user.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-xl font-bold text-primary-500">{caregiver.user?.name?.[0]}</span>
-                        )}
-                      </div>
+                      <Avatar src={caregiver.user?.profileImage} name={caregiver.user?.name} size="lg" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-bold text-gray-900">{caregiver.user?.name}</span>
@@ -84,27 +83,24 @@ export default async function CaregiverSearchPage({
                           <span className="text-xs text-gray-500">{caregiver.region}</span>
                         </div>
                         <div className="flex items-center gap-2 mt-2">
-                          <div className="flex items-center gap-0.5">
-                            <Star size={12} className="text-yellow-400 fill-yellow-400" />
+                          <div className="flex items-center gap-1">
+                            <StarRating value={Math.round(caregiver.averageRating || 0)} readonly size="sm" />
                             <span className="text-xs font-semibold text-gray-700">
                               {caregiver.averageRating ? caregiver.averageRating.toFixed(1) : "신규"}
                             </span>
                             <span className="text-xs text-gray-400">({caregiver.totalReviews})</span>
                           </div>
                           {caregiver.certificates?.length > 0 && (
-                            <div className="flex items-center gap-0.5">
-                              <CheckCircle size={12} className="text-green-500" />
-                              <span className="text-xs text-green-600 font-medium">
-                                자격증 {caregiver.certificates.length}개
-                              </span>
-                            </div>
+                            <Badge variant="success" size="sm">
+                              자격증 {caregiver.certificates.length}개
+                            </Badge>
                           )}
                         </div>
                         <div className="flex flex-wrap gap-1 mt-2">
                           {cats.slice(0, 3).map((type) => (
-                            <span key={type} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            <Tag key={type} color="bg-gray-100 text-gray-600">
                               {CARE_LABELS[type] || type}
-                            </span>
+                            </Tag>
                           ))}
                         </div>
                         <p className="text-xs font-semibold text-primary-500 mt-2">

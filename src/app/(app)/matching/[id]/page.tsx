@@ -4,6 +4,8 @@ import { redirect, notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { MessageSquare, FileText, Users, ChevronLeft } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
+import Badge from "@/components/ui/Badge";
 import MatchingActions from "./MatchingActions";
 import BackHeader from "@/components/layout/BackHeader";
 
@@ -63,9 +65,9 @@ export default async function MatchingDetailPage({ params }: { params: { id: str
       <div className="bg-white px-4 py-5 border-b border-gray-100">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-base font-bold text-gray-900">매칭 정보</h1>
-          <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${statusInfo.color}`}>
+          <Badge className={statusInfo.color} size="sm">
             {statusInfo.label}
-          </span>
+          </Badge>
         </div>
         <p className="text-sm text-gray-500">{statusInfo.desc}</p>
       </div>
@@ -75,13 +77,7 @@ export default async function MatchingDetailPage({ params }: { params: { id: str
         <div className="bg-white rounded-2xl border border-gray-100 p-4">
           <p className="text-xs text-gray-500 mb-3">{isGuardian ? "요양보호사" : "보호자"}</p>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-              {other?.profileImage ? (
-                <img src={other.profileImage} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-base font-bold text-gray-500">{other?.name?.[0]}</span>
-              )}
-            </div>
+            <Avatar src={other?.profileImage} name={other?.name} size="md" />
             <div className="flex-1">
               <p className="text-sm font-bold text-gray-900">{other?.name}</p>
               <p className="text-xs text-gray-500 mt-0.5">

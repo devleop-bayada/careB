@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { Bell, MessageSquare, Star, Calendar, Users, AlertCircle } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
 import NotificationsClient from "./NotificationsClient";
 import BackHeader from "@/components/layout/BackHeader";
 
@@ -56,12 +57,11 @@ export default async function NotificationsPage() {
       <BackHeader title="알림" fallbackHref="/home" />
 
       {notifications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-1 py-20">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <Bell size={28} className="text-gray-300" />
-          </div>
-          <p className="text-gray-500 font-medium">새로운 알림이 없습니다</p>
-        </div>
+        <EmptyState
+          icon={<Bell size={40} />}
+          title="새로운 알림이 없습니다"
+          className="flex-1"
+        />
       ) : (
         <div className="py-2">
           {Object.entries(grouped).map(([date, items]) => (

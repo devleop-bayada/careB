@@ -9,6 +9,9 @@ import {
   Droplets, Stethoscope, Sun, Clock, Timer, Hospital, Brain,
   ShieldCheck, FileText, MapPin, Wallet, AlertTriangle, UserCheck
 } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
+import StarRating from "@/components/ui/StarRating";
+import Badge from "@/components/ui/Badge";
 
 async function getHomeData(userId: string, role: string) {
   if (role === "GUARDIAN") {
@@ -153,7 +156,7 @@ export default async function HomePage() {
                         })} {cs.startTime}
                       </p>
                     </div>
-                    <span className="text-xs bg-blue-100 text-blue-700 font-medium px-2 py-1 rounded-full">요양 예정</span>
+                    <Badge variant="blue" size="sm">요양 예정</Badge>
                   </div>
                 </Link>
               );
@@ -175,18 +178,17 @@ export default async function HomePage() {
             {recentCaregivers.map((caregiver: any) => (
               <Link key={caregiver.id} href={`/caregiver/${caregiver.id}`} className="flex-shrink-0">
                 <div className="w-28 bg-white border border-gray-100 rounded-2xl p-3 hover:shadow-md transition-shadow">
-                  <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-2 overflow-hidden">
-                    {caregiver.user?.profileImage ? (
-                      <img src={caregiver.user.profileImage} alt={caregiver.user.name} className="w-14 h-14 rounded-full object-cover" />
-                    ) : (
-                      <span className="text-xl font-bold text-primary-500">{caregiver.user?.name?.[0]}</span>
-                    )}
+                  <div className="mx-auto mb-2">
+                    <Avatar src={caregiver.user?.profileImage} name={caregiver.user?.name} size="lg" className="mx-auto" />
                   </div>
                   <p className="text-xs font-semibold text-gray-900 text-center truncate">{caregiver.user?.name}</p>
                   <p className="text-xs text-gray-500 text-center mt-0.5 truncate">{caregiver.region}</p>
                   <div className="flex items-center justify-center gap-0.5 mt-1">
-                    <Star size={10} className="text-yellow-400 fill-yellow-400" />
-                    <span className="text-xs text-gray-600">{caregiver.averageRating?.toFixed(1) ?? "신규"}</span>
+                    {caregiver.averageRating ? (
+                      <StarRating value={Math.round(caregiver.averageRating)} readonly size="sm" className="scale-50 origin-center" />
+                    ) : (
+                      <span className="text-xs text-gray-600">신규</span>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -213,13 +215,7 @@ export default async function HomePage() {
               return (
                 <Link key={caregiver.id} href={`/caregiver/${caregiver.id}`}>
                   <div className="bg-white border border-gray-100 rounded-xl p-3.5 flex items-center gap-3 hover:shadow-sm transition-shadow">
-                    <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {caregiver.user?.profileImage ? (
-                        <img src={caregiver.user.profileImage} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-lg font-bold text-primary-500">{caregiver.user?.name?.[0]}</span>
-                      )}
-                    </div>
+                    <Avatar src={caregiver.user?.profileImage} name={caregiver.user?.name} size="md" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-bold text-gray-900 truncate">{caregiver.user?.name}</p>

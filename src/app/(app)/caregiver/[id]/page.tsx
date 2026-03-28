@@ -4,6 +4,10 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Star, MapPin, CheckCircle, MessageSquare, Heart } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
+import StarRating from "@/components/ui/StarRating";
+import Badge from "@/components/ui/Badge";
+import Tag from "@/components/ui/Tag";
 import CaregiverTabs from "./CaregiverTabs";
 import BookmarkButton from "./BookmarkButton";
 import GradeBadge from "@/components/caregiver/GradeBadge";
@@ -52,13 +56,7 @@ export default async function CaregiverDetailPage({ params }: { params: { id: st
       {/* Profile Header */}
       <div className="bg-white px-4 pt-5 pb-5">
         <div className="flex items-start gap-4">
-          <div className="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {caregiver.user?.profileImage ? (
-              <img src={caregiver.user.profileImage} alt={caregiver.user.name || ""} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-3xl font-bold text-primary-500">{caregiver.user?.name?.[0]}</span>
-            )}
-          </div>
+          <Avatar src={caregiver.user?.profileImage} name={caregiver.user?.name} size="xl" />
           <div className="flex-1 relative">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -73,7 +71,7 @@ export default async function CaregiverDetailPage({ params }: { params: { id: st
             </div>
             <div className="flex items-center gap-3 mt-2">
               <div className="flex items-center gap-1">
-                <Star size={14} className="text-yellow-400 fill-yellow-400" />
+                <StarRating value={Math.round(caregiver.averageRating || 0)} readonly size="sm" />
                 <span className="text-sm font-bold text-gray-900">
                   {caregiver.averageRating > 0 ? caregiver.averageRating.toFixed(1) : "신규"}
                 </span>
@@ -90,10 +88,10 @@ export default async function CaregiverDetailPage({ params }: { params: { id: st
             {caregiver.certificates
               .filter((c) => c.verificationStatus === "VERIFIED")
               .map((cert) => (
-                <div key={cert.id} className="flex items-center gap-1 bg-green-50 px-2.5 py-1 rounded-full">
-                  <CheckCircle size={12} className="text-green-500" />
-                  <span className="text-xs text-green-700 font-medium">{cert.name}</span>
-                </div>
+                <Badge key={cert.id} variant="success" size="sm">
+                  <CheckCircle size={12} className="mr-1" />
+                  {cert.name}
+                </Badge>
               ))}
           </div>
         )}
@@ -101,9 +99,9 @@ export default async function CaregiverDetailPage({ params }: { params: { id: st
         {/* Care Types */}
         <div className="flex flex-wrap gap-1.5 mt-3">
           {cats.map((type) => (
-            <span key={type} className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-medium">
+            <Tag key={type} color="bg-gray-100 text-gray-600">
               {CARE_LABELS[type] || type}
-            </span>
+            </Tag>
           ))}
         </div>
 

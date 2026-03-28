@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { ChevronRight, Users } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
+import Badge from "@/components/ui/Badge";
+import EmptyState from "@/components/ui/EmptyState";
 import MatchingTabs from "./MatchingTabs";
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -88,23 +91,21 @@ export default async function MatchingPage({
 
       <div className="px-4 py-4 space-y-3">
         {matches.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <Users size={28} className="text-gray-300" />
-            </div>
-            <p className="text-gray-500 font-medium">아직 매칭 내역이 없습니다</p>
-            <p className="text-sm text-gray-400 mt-1 text-center leading-relaxed">
-              {isGuardian
-                ? "요양보호사를 검색하고 상담을 요청해 보세요"
-                : "일자리를 검색하고 지원해 보세요"}
-            </p>
-            <Link
-              href={isGuardian ? "/search/caregiver" : "/search/guardian"}
-              className="mt-4 bg-primary-500 text-white text-sm font-semibold px-5 py-2.5 rounded-full"
-            >
-              {isGuardian ? "요양보호사 찾기" : "일자리 찾기"}
-            </Link>
-          </div>
+          <EmptyState
+            icon={<Users size={40} />}
+            title="아직 매칭 내역이 없습니다"
+            description={isGuardian
+              ? "요양보호사를 검색하고 상담을 요청해 보세요"
+              : "일자리를 검색하고 지원해 보세요"}
+            action={
+              <Link
+                href={isGuardian ? "/search/caregiver" : "/search/guardian"}
+                className="mt-2 bg-primary-500 text-white text-sm font-semibold px-5 py-2.5 rounded-full"
+              >
+                {isGuardian ? "요양보호사 찾기" : "일자리 찾기"}
+              </Link>
+            }
+          />
         ) : (
           matches.map((match: any) => {
             const other = isGuardian ? match.caregiver?.user : match.guardian?.user;
@@ -114,13 +115,7 @@ export default async function MatchingPage({
                 <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition-shadow">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {other?.profileImage ? (
-                          <img src={other.profileImage} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-sm font-bold text-gray-500">{other?.name?.[0]}</span>
-                        )}
-                      </div>
+                      <Avatar src={other?.profileImage} name={other?.name} size="md" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-gray-900 truncate">{other?.name}</p>
                         <p className="text-xs text-gray-500 mt-0.5">
@@ -132,9 +127,9 @@ export default async function MatchingPage({
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${status.color}`}>
+                      <Badge className={status.color} size="sm">
                         {status.label}
-                      </span>
+                      </Badge>
                       <ChevronRight size={14} className="text-gray-300" />
                     </div>
                   </div>

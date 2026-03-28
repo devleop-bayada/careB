@@ -1,6 +1,8 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { MapPin, ChevronRight, HeartHandshake } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
+import EmptyState from "@/components/ui/EmptyState";
 import GuardianSearchFilters from "./GuardianSearchFilters";
 
 async function getGuardians(searchParams: Record<string, string>) {
@@ -40,11 +42,11 @@ export default async function GuardianSearchPage({
         </p>
 
         {guardians.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <HeartHandshake size={40} className="text-gray-200 mb-3" />
-            <p className="text-gray-500 font-medium">검색 조건에 맞는 구인글이 없습니다</p>
-            <p className="text-sm text-gray-400 mt-1">지역 필터를 변경하거나 나중에 다시 확인해 보세요</p>
-          </div>
+          <EmptyState
+            icon={<HeartHandshake size={40} />}
+            title="검색 조건에 맞는 구인글이 없습니다"
+            description="지역 필터를 변경하거나 나중에 다시 확인해 보세요"
+          />
         ) : (
           <div className="space-y-3">
             {guardians.map((guardian: any) => (
@@ -52,13 +54,7 @@ export default async function GuardianSearchPage({
                 <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {guardian.user?.profileImage ? (
-                          <img src={guardian.user.profileImage} alt={guardian.user.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-lg font-bold text-blue-500">{guardian.user?.name?.[0]}</span>
-                        )}
-                      </div>
+                      <Avatar src={guardian.user?.profileImage} name={guardian.user?.name} size="md" />
                       <div>
                         <p className="text-sm font-bold text-gray-900">{guardian.user?.name}</p>
                         <div className="flex items-center gap-1 mt-0.5">
