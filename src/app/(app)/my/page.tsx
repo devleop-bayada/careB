@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   User, Star, CreditCard, Baby, Shield, Calendar, DollarSign,
-  Bell, HelpCircle, ChevronRight, LogOut, Heart, Users
+  Bell, HelpCircle, ChevronRight, LogOut, Heart, Users,
+  GraduationCap, Briefcase, AlertTriangle
 } from "lucide-react";
 import Avatar from "@/components/ui/Avatar";
 import Badge from "@/components/ui/Badge";
@@ -23,6 +24,7 @@ export default async function MyPage() {
     { href: "/my/pass", icon: CreditCard, label: "이용권 관리" },
     { href: "/my/care-recipients", icon: Baby, label: "어르신 관리" },
     { href: "/my/co-guardians", icon: Users, label: "공동보호자 관리" },
+    { href: "/emergency", icon: AlertTriangle, label: "긴급 돌봄" },
     { href: "/care", icon: Calendar, label: "돌봄 관리" },
     { href: "/care/settlement", icon: DollarSign, label: "정산 내역" },
     { href: "/my/settings", icon: Bell, label: "알림 설정" },
@@ -32,6 +34,8 @@ export default async function MyPage() {
     { href: "/my/profile", icon: User, label: "프로필 수정" },
     { href: "/my/reviews", icon: Star, label: "받은 리뷰" },
     { href: "/my/certificates", icon: Shield, label: "자격 관리" },
+    { href: "/education", icon: GraduationCap, label: "교육 센터" },
+    { href: "/portfolio", icon: Briefcase, label: "포트폴리오" },
     { href: "/care", icon: Calendar, label: "돌봄 관리" },
     { href: "/care/settlement", icon: DollarSign, label: "정산 내역" },
     { href: "/my/settings", icon: Bell, label: "알림 설정" },

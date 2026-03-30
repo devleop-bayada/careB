@@ -2,23 +2,38 @@
 
 import { useRouter, usePathname } from "next/navigation";
 
-const CATEGORIES = [
+const GUARDIAN_CATEGORIES = [
   { value: "ALL", label: "전체" },
-  { value: "PARENTING", label: "돌봄이야기" },
-  { value: "EDUCATION", label: "요양정보" },
-  { value: "CAREGIVER", label: "요양보호사이야기" },
-  { value: "QNA", label: "질문/상담" },
-  { value: "POLICY", label: "제도안내" },
-  { value: "HEALTH", label: "건강정보" },
+  { value: "PARENTING", label: "돌봄 경험담" },
+  { value: "EDUCATION", label: "요양 정보" },
+  { value: "QNA", label: "질문/답변" },
+  { value: "FREE", label: "자유" },
 ];
 
-export default function CommunityTabs({ activeCategory }: { activeCategory: string }) {
+const CAREGIVER_CATEGORIES = [
+  { value: "ALL", label: "전체" },
+  { value: "CARE_KNOWHOW", label: "케어 노하우" },
+  { value: "CASE_QNA", label: "사례 Q&A" },
+  { value: "POLICY", label: "제도/법률" },
+  { value: "JOB", label: "일자리" },
+  { value: "FREE", label: "자유" },
+];
+
+export default function CommunityTabs({
+  activeCategory,
+  role,
+}: {
+  activeCategory: string;
+  role?: string;
+}) {
   const router = useRouter();
   const pathname = usePathname();
 
+  const categories = role === "CAREGIVER" ? CAREGIVER_CATEGORIES : GUARDIAN_CATEGORIES;
+
   return (
     <div className="flex gap-1 overflow-x-auto pb-3 scrollbar-hide">
-      {CATEGORIES.map((cat) => (
+      {categories.map((cat) => (
         <button
           key={cat.value}
           onClick={() => router.push(`${pathname}?category=${cat.value}`)}

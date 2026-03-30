@@ -19,12 +19,14 @@ const CERT_STEPS = [
 type StepStatus = "completed" | "in_progress" | "pending";
 
 export default function CertificatesPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const user = session?.user as any;
-  if (user !== undefined && user?.role !== "CAREGIVER") { router.push("/home"); return null; }
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [uploading, setUploading] = useState<string | null>(null);
+
+  if (status === "loading") return <div className="flex items-center justify-center min-h-screen"><div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" /></div>;
+  const user = session?.user as any;
+  if (user?.role !== "CAREGIVER") { router.push("/home"); return null; }
 
   const completed = Object.values(statuses).filter((s) => s === "completed").length;
   const inProgress = Object.values(statuses).filter((s) => s === "in_progress").length;

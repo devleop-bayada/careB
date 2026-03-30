@@ -42,7 +42,7 @@ export default async function ReviewsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <BackHeader title="리뷰 관리" fallbackHref="/my" />
+      <BackHeader title={isCaregiver ? "받은 리뷰" : "내 리뷰"} fallbackHref="/my" />
 
       {reviews.length > 0 && (
         <div className="mx-4 mt-4 bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-4">

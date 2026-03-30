@@ -24,9 +24,7 @@ interface CaregiverInfo {
 
 export default function WriteReviewPage() {
   const router = useRouter();
-  const { data: session } = useSession();
-  const user = session?.user as any;
-  if (user !== undefined && user?.role !== "GUARDIAN") { router.push("/home"); return null; }
+  const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const careSessionId = searchParams.get("careSessionId") ?? "";
   const caregiverId = searchParams.get("caregiverId") ?? "";
@@ -53,6 +51,10 @@ export default function WriteReviewPage() {
       .catch(() => setCaregiver(null))
       .finally(() => setLoading(false));
   }, [caregiverId]);
+
+  if (status === "loading") return <div className="flex items-center justify-center min-h-screen"><div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" /></div>;
+  const user = session?.user as any;
+  if (user?.role !== "GUARDIAN") { router.push("/home"); return null; }
 
   function toggleTag(tag: string) {
     setSelectedTags((prev) =>

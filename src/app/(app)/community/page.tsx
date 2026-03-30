@@ -4,6 +4,8 @@ import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
 import CommunityTabs from "./CommunityTabs";
 import CommunitySearch from "./CommunitySearch";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 const CATEGORY_LABELS: Record<string, string> = {
   ALL: "전체",
@@ -37,6 +39,8 @@ export default async function CommunityPage({
 }: {
   searchParams: Record<string, string>;
 }) {
+  const session = await getServerSession(authOptions);
+  const userRole = (session?.user as any)?.role;
   const category = searchParams.category || "ALL";
   const q = searchParams.q || "";
   const sort = searchParams.sort || "latest";
@@ -48,7 +52,7 @@ export default async function CommunityPage({
       <div className="bg-white px-4 pt-4 pb-0 border-b border-gray-100 sticky top-14 z-30">
         <h1 className="text-base font-bold text-gray-900 mb-3">커뮤니티</h1>
         <CommunitySearch initialQuery={q} initialSort={sort} />
-        <CommunityTabs activeCategory={category} />
+        <CommunityTabs activeCategory={category} role={userRole} />
       </div>
 
       {/* Posts */}
