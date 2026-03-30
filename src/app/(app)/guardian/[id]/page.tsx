@@ -78,15 +78,17 @@ export default async function GuardianDetailPage({ params }: { params: { id: str
           </h2>
           <div className="space-y-2">
             {guardian.careRecipients.map((recipient: any) => {
-              const birthYear = new Date(recipient.birthDate).getFullYear();
-              const age = new Date().getFullYear() - birthYear;
+              const birthYear = recipient.birthYear;
+              const age = birthYear ? new Date().getFullYear() - birthYear : null;
               return (
                 <div key={recipient.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm">👴</span>
+                    <span className="text-sm">{recipient.gender === "FEMALE" ? "👵" : "👴"}</span>
                     <span className="text-sm font-medium text-gray-900">{recipient.name}</span>
                   </div>
-                  <span className="text-sm text-gray-600">{age}세 ({birthYear}년생)</span>
+                  <span className="text-sm text-gray-600">
+                    {age !== null ? `${age}세 (${birthYear}년생)` : "정보 없음"}
+                  </span>
                 </div>
               );
             })}

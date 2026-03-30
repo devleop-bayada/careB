@@ -85,7 +85,7 @@ export default async function MatchingPage({
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <div className="bg-white px-4 pt-4 pb-0 border-b border-gray-100 sticky top-14 z-30">
-        <h1 className="text-base font-bold text-gray-900 mb-3">매칭 현황</h1>
+        <h1 className="text-base font-bold text-gray-900 mb-3">{isGuardian ? "매칭 현황" : "받은 면접 제안"}</h1>
         <MatchingTabs activeTab={tab} />
       </div>
 
@@ -93,10 +93,10 @@ export default async function MatchingPage({
         {matches.length === 0 ? (
           <EmptyState
             icon={<Users size={40} />}
-            title="아직 매칭 내역이 없습니다"
+            title={isGuardian ? "아직 매칭 내역이 없습니다" : "아직 받은 제안이 없습니다"}
             description={isGuardian
               ? "요양보호사를 검색하고 상담을 요청해 보세요"
-              : "일자리를 검색하고 지원해 보세요"}
+              : "프로필을 완성하면 더 많은 면접 제안을 받을 수 있어요"}
             action={
               <Link
                 href={isGuardian ? "/search/caregiver" : "/search/guardian"}

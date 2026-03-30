@@ -4,13 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Home, Search, MessageSquare, Users, User, Bell, AlertTriangle } from "lucide-react";
+import { Home, Search, MessageSquare, Users, User, Bell, AlertTriangle, Handshake } from "lucide-react";
 
 interface NavItem {
   href: string;
   guardianLabel: string;
   caregiverLabel: string;
   icon: React.ReactNode;
+  caregiverOnly?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -27,10 +28,11 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Search size={22} />,
   },
   {
-    href: "/community",
-    guardianLabel: "커뮤니티",
-    caregiverLabel: "커뮤니티",
-    icon: <Users size={22} />,
+    href: "/matching",
+    guardianLabel: "매칭",
+    caregiverLabel: "면접제안",
+    icon: <Handshake size={22} />,
+    caregiverOnly: false,
   },
   {
     href: "/chat",
@@ -118,6 +120,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const isActive = (href: string) => {
     if (href === "/home") return pathname === "/home";
+    if (href === "/matching") return pathname.startsWith("/matching");
+    if (href === "/search/caregiver" || href === "/search/guardian") return pathname.startsWith("/search");
     return pathname.startsWith(href);
   };
 
