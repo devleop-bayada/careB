@@ -167,11 +167,11 @@ export default function SettingsPage() {
         <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">정보</p>
         <div className="bg-white divide-y divide-gray-50">
           {[
-            { label: "서비스 이용약관" },
-            { label: "개인정보처리방침" },
-            { label: "오픈소스 라이선스" },
+            { label: "서비스 이용약관", href: "/terms" },
+            { label: "개인정보처리방침", href: "/privacy" },
+            { label: "오픈소스 라이선스", href: null },
           ].map((item) => (
-            <button key={item.label} onClick={handlePlaceholder} className="w-full">
+            <button key={item.label} onClick={item.href ? () => router.push(item.href!) : handlePlaceholder} className="w-full">
               <div className="flex items-center justify-between px-4 py-4">
                 <span className="text-sm font-medium text-gray-900">{item.label}</span>
                 <ChevronRight size={16} className="text-gray-300" />

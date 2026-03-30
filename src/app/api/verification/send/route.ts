@@ -89,9 +89,10 @@ export async function POST(req: NextRequest) {
       data: { phone, code, type, expiresAt },
     });
 
-    // 개발용: console.log
-    console.log(`[SMS 인증코드] phone=${phone} type=${type} code=${code}`);
+    // 개발용: 전화번호만 로깅, 코드는 로깅하지 않음
+    console.log(`[SMS 인증코드] phone=${phone} type=${type}`);
 
+    const isDev = process.env.NODE_ENV === "development";
     const skipSms = process.env.SKIP_SMS_VERIFICATION === "true";
     const remainingToday = DAILY_LIMIT - dailyCount - 1;
 
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
       message: "인증코드가 발송되었습니다.",
       remainingToday,
       dailyLimit: DAILY_LIMIT,
-      ...(skipSms ? { devCode: code } : {}),
+      ...(isDev && skipSms ? { devCode: code } : {}),
     });
   } catch (error) {
     console.error("[verification/send] error:", error);

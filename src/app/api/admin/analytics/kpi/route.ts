@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 function requireAdmin(session: any) {
-  return session?.user?.role === "ADMIN";
+  return ["ADMIN", "OPERATOR"].includes(session?.user?.role);
 }
 
 // GET /api/admin/analytics/kpi

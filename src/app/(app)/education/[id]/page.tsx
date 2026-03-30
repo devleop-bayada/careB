@@ -84,10 +84,9 @@ export default async function EducationDetailPage({
 
       {/* Content */}
       <div className="px-5 py-5 flex-1">
-        <div
-          className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: education.content }}
-        />
+        <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
+          {education.content}
+        </div>
       </div>
 
       {/* Action Button */}
