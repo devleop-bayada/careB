@@ -16,16 +16,16 @@ interface ToastProps {
 
 const typeStyles: Record<ToastType, { bg: string; icon: React.ReactNode }> = {
   success: {
-    bg: 'bg-green-50 border-green-200 text-green-800',
-    icon: <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />,
+    bg: 'bg-gray-800/90 border-transparent text-white',
+    icon: <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0" />,
   },
   error: {
-    bg: 'bg-red-50 border-red-200 text-red-800',
-    icon: <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />,
+    bg: 'bg-gray-800/90 border-transparent text-white',
+    icon: <XCircle className="h-5 w-5 text-red-400 flex-shrink-0" />,
   },
   info: {
-    bg: 'bg-blue-50 border-blue-200 text-blue-800',
-    icon: <Info className="h-5 w-5 text-blue-500 flex-shrink-0" />,
+    bg: 'bg-gray-800/90 border-transparent text-white',
+    icon: <Info className="h-5 w-5 text-white/70 flex-shrink-0" />,
   },
 };
 

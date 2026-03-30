@@ -31,9 +31,9 @@ const ICONS: Record<ToastType, string> = {
 };
 
 const COLORS: Record<ToastType, string> = {
-  success: "bg-green-500",
-  error: "bg-red-500",
-  info: "bg-blue-500",
+  success: "bg-gray-800/90",
+  error: "bg-gray-800/90",
+  info: "bg-gray-800/90",
 };
 
 export default function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -59,7 +59,7 @@ export default function ToastProvider({ children }: { children: React.ReactNode 
   return (
     <ToastContext.Provider value={{ success, error, info }}>
       {children}
-      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none">
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none">
         {toasts.map((toast) => (
           <div
             key={toast.id}
