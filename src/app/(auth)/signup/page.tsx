@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { HeartHandshake, Briefcase } from "lucide-react";
+import BackHeader from "@/components/layout/BackHeader";
+
 export default function SignupPage() {
   return (
     <div className="w-full">
+      <BackHeader title="회원가입" fallbackHref="/" />
+      <div className="px-4 pt-6">
       <h1 className="text-xl font-bold text-gray-900 text-center mb-2">회원가입</h1>
       <p className="text-sm text-gray-500 text-center mb-8">어떤 회원으로 가입하시겠어요?</p>
 
@@ -57,6 +61,7 @@ export default function SignupPage() {
           로그인
         </Link>
       </p>
+      </div>
     </div>
   );
 }
