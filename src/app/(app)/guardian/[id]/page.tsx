@@ -107,7 +107,7 @@ export default async function GuardianDetailPage({ params }: { params: { id: str
 
       {/* Fixed Bottom CTA */}
       {isCaregiver && (
-        <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
           <div className="flex gap-2">
             <MessageButton matchId={existingMatchId} guardianId={params.id} />
             <Link

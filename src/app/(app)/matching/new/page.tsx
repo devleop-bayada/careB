@@ -432,7 +432,7 @@ export default function NewMatchingPage() {
         </div>
 
         {/* 하단 고정 버튼 */}
-        <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
           <Button
             type="submit"
             variant="primary"

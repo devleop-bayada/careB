@@ -159,7 +159,7 @@ export default function ChatRoomPage() {
   }
 
   return (
-    <div className="flex flex-col bg-gray-50" style={{ height: "calc(100vh - 4rem)" }}>
+    <div className="flex flex-col bg-gray-50" style={{ height: "100vh" }}>
       <BackHeader
         title={
           <div className="flex items-center gap-2">

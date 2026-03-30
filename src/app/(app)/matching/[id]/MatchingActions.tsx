@@ -87,7 +87,7 @@ export default function MatchingActions({ matchId, status, isGuardian, isCaregiv
         </div>
       )}
 
-      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
         {showSitterActions && (
           <div className="flex gap-2">
             <button
