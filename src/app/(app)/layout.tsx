@@ -151,7 +151,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 pb-16">{children}</main>
+        <main className={`flex-1 ${showBottomNav ? "pb-16" : ""}`}>{children}</main>
 
         {/* Floating SOS for care pages */}
         {pathname.startsWith("/care/") && pathname !== "/care/settlement" && (
