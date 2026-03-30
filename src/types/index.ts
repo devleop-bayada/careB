@@ -1,4 +1,4 @@
-export type UserRole = "GUARDIAN" | "CAREGIVER" | "ADMIN";
+export type UserRole = "GUARDIAN" | "CAREGIVER" | "ADMIN" | "OPERATOR" | "INSTITUTION";
 export type Gender = "MALE" | "FEMALE";
 export type ServiceCategory =
   | "HOME_CARE"
