@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import BackHeader from "@/components/layout/BackHeader";
 import Button from "@/components/ui/Button";
 import { AlertTriangle } from "lucide-react";
+import DatePicker from "@/components/ui/DatePicker";
 
 interface CareRecipient {
   id: string;
@@ -36,6 +38,9 @@ function tomorrowStr() {
 
 export default function EmergencyPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const user = session?.user as any;
+  if (user !== undefined && user?.role !== "GUARDIAN") { router.push("/home"); return null; }
   const [careRecipients, setCareRecipients] = useState<CareRecipient[]>([]);
   const [selectedRecipientId, setSelectedRecipientId] = useState("");
   const [dateMode, setDateMode] = useState<"today" | "tomorrow" | "custom">("today");
@@ -158,12 +163,10 @@ export default function EmergencyPage() {
               ))}
             </div>
             {dateMode === "custom" && (
-              <input
-                type="date"
+              <DatePicker
                 value={customDate}
-                min={todayStr()}
-                onChange={(e) => setCustomDate(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                onChange={setCustomDate}
+                minDate={todayStr()}
               />
             )}
           </div>

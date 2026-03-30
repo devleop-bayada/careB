@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import BackHeader from "@/components/layout/BackHeader";
 import Button from "@/components/ui/Button";
 import StarRating from "@/components/review/StarRating";
@@ -23,6 +24,9 @@ interface CaregiverInfo {
 
 export default function WriteReviewPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const user = session?.user as any;
+  if (user !== undefined && user?.role !== "GUARDIAN") { router.push("/home"); return null; }
   const searchParams = useSearchParams();
   const careSessionId = searchParams.get("careSessionId") ?? "";
   const caregiverId = searchParams.get("caregiverId") ?? "";

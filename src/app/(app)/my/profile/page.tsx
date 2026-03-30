@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import BackHeader from "@/components/layout/BackHeader";
+import Avatar from "@/components/ui/Avatar";
 
 const SITTER_CARE_TYPES = [
   { value: "HOME_CARE", label: "방문요양" },
@@ -26,9 +27,13 @@ export default function ProfileEditPage() {
   const [experienceYears, setExperienceYears] = useState("");
   const [education, setEducation] = useState("");
   const [serviceCategories, setServiceCategories] = useState<string[]>([]);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -38,6 +43,7 @@ export default function ProfileEditPage() {
         const u = data.user;
         setName(u?.name || "");
         setPhone(u?.phone || "");
+        setProfileImage(u?.profileImage || null);
         if (u?.caregiverProfile) {
           setRegion(u.caregiverProfile.region || "");
           setAddress(u.caregiverProfile.address || "");
@@ -54,6 +60,54 @@ export default function ProfileEditPage() {
         }
       });
   }, [session]);
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 즉시 미리보기
+    const objectUrl = URL.createObjectURL(file);
+    setImagePreview(objectUrl);
+
+    // 업로드
+    setImageUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!uploadRes.ok) {
+        const data = await uploadRes.json();
+        setError(data.error || "이미지 업로드에 실패했습니다.");
+        setImagePreview(null);
+        return;
+      }
+      const { url } = await uploadRes.json();
+
+      // profileImage 업데이트
+      const patchRes = await fetch("/api/users/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileImage: url }),
+      });
+      if (!patchRes.ok) {
+        const data = await patchRes.json();
+        setError(data.error || "프로필 이미지 저장에 실패했습니다.");
+        setImagePreview(null);
+        return;
+      }
+      setProfileImage(url);
+    } catch {
+      setError("이미지 업로드 중 오류가 발생했습니다.");
+      setImagePreview(null);
+    } finally {
+      setImageUploading(false);
+      // objectUrl 메모리 해제
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
 
   function toggleCareType(v: string) {
     setServiceCategories((prev) =>
@@ -108,6 +162,42 @@ export default function ProfileEditPage() {
       )}
 
       <form onSubmit={handleSubmit} className="px-4 py-5 space-y-5">
+        {/* 프로필 이미지 */}
+        <div className="flex flex-col items-center gap-2 py-2">
+          <div
+            className="relative cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Avatar
+              src={imagePreview || profileImage}
+              name={name || "사용자"}
+              size="xl"
+            />
+            <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/30">
+              {imageUploading ? (
+                <svg className="w-6 h-6 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              )}
+            </div>
+          </div>
+          <span className="text-xs text-gray-500">사진 변경</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={handleImageChange}
+          />
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">이름</label>
           <input type="text" value={name} onChange={(e) => setName(e.target.value)}
@@ -170,6 +260,13 @@ export default function ProfileEditPage() {
           </>
         )}
 
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-3.5 bg-primary-500 text-white rounded-xl font-semibold text-sm disabled:opacity-50"
+        >
+          {loading ? "저장 중..." : "저장하기"}
+        </button>
       </form>
     </div>
   );

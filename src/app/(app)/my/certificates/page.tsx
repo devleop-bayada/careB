@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { CheckCircle, Clock, AlertCircle, Upload, Shield } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const CERT_STEPS = [
   { id: "identity", step: 1, label: "본인인증", desc: "주민등록증 또는 운전면허증으로 본인 확인" },
@@ -17,6 +19,10 @@ const CERT_STEPS = [
 type StepStatus = "completed" | "in_progress" | "pending";
 
 export default function CertificatesPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const user = session?.user as any;
+  if (user !== undefined && user?.role !== "CAREGIVER") { router.push("/home"); return null; }
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [uploading, setUploading] = useState<string | null>(null);
 

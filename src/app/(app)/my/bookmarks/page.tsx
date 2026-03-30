@@ -7,6 +7,8 @@ import StarRating from "@/components/ui/StarRating";
 import EmptyState from "@/components/ui/EmptyState";
 import BackHeader from "@/components/layout/BackHeader";
 import { useBookmarks, useToggleBookmark } from "@/hooks/useBookmarks";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface BookmarkedCaregiver {
   id: string;
@@ -26,6 +28,10 @@ interface BookmarkedCaregiver {
 }
 
 export default function BookmarksPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const user = session?.user as any;
+  if (user !== undefined && user?.role !== "GUARDIAN") { router.push("/home"); return null; }
   const { bookmarks, isLoading } = useBookmarks();
   const toggleBookmark = useToggleBookmark();
 

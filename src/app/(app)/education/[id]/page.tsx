@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -29,7 +29,9 @@ export default async function EducationDetailPage({
   if (!education) notFound();
 
   const session = await getServerSession(authOptions);
-  const user = session?.user as any;
+  if (!session?.user) redirect("/login");
+  const user = session.user as any;
+  if (user.role !== "CAREGIVER") redirect("/home");
 
   let enrollment = null;
   if (user) {

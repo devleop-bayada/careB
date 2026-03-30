@@ -10,6 +10,8 @@ import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 import Textarea from "@/components/ui/Textarea";
+import DatePicker from "@/components/ui/DatePicker";
+import TimePicker from "@/components/ui/TimePicker";
 
 const SERVICE_CATEGORY_OPTIONS = [
   { value: "HOME_CARE", label: "방문요양" },
@@ -362,38 +364,31 @@ export default function NewMatchingPage() {
 
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">시작 시간</label>
-                <input
-                  type="time"
+                <TimePicker
+                  label="시작 시간"
                   value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-base px-4 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent focus:bg-white"
+                  onChange={setStartTime}
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">종료 시간</label>
-                <input
-                  type="time"
+                <TimePicker
+                  label="종료 시간"
                   value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-base px-4 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent focus:bg-white"
+                  onChange={setEndTime}
                 />
               </div>
             </div>
 
-            <Input
+            <DatePicker
               label="희망 시작일"
-              type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              required
+              onChange={setStartDate}
             />
 
-            <Input
+            <DatePicker
               label="종료일 (선택)"
-              type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={setEndDate}
             />
 
             <div>

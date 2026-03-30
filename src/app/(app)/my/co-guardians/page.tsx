@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Users, Phone, UserPlus, Check, X, Shield } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface CoGuardian {
   id: string;
@@ -13,6 +15,10 @@ interface CoGuardian {
 }
 
 export default function CoGuardiansPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const user = session?.user as any;
+  if (user !== undefined && user?.role !== "GUARDIAN") { router.push("/home"); return null; }
   const [coGuardians, setCoGuardians] = useState<CoGuardian[]>([]);
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [invitePhone, setInvitePhone] = useState("");

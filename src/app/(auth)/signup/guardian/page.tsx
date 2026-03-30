@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import BackHeader from "@/components/layout/BackHeader";
 import CustomSelect from "@/components/ui/CustomSelect";
+import PhoneVerification from "@/components/ui/PhoneVerification";
 
 const STEPS = ["계정 정보", "지역 및 어르신 정보"];
 
@@ -33,6 +34,7 @@ export default function GuardianSignupPage() {
 
   // Step 0
   const [phone, setPhone] = useState("");
+  const [phoneVerified, setPhoneVerified] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [name, setName] = useState("");
@@ -69,6 +71,7 @@ export default function GuardianSignupPage() {
       if (password !== passwordConfirm) return "비밀번호가 일치하지 않습니다.";
       if (password.length < 8) return "비밀번호는 8자 이상이어야 합니다.";
       if (!/^010-?\d{4}-?\d{4}$/.test(phone.replace(/-/g, "").replace(/^(\d{3})(\d{4})(\d{4})$/, "$1-$2-$3"))) return "올바른 전화번호를 입력해주세요.";
+      if (!phoneVerified) return "전화번호 인증을 완료해주세요.";
     }
     if (step === 1) {
       if (!region || !district) return "지역을 선택해주세요.";
@@ -163,10 +166,18 @@ export default function GuardianSignupPage() {
             <input
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(formatPhone(e.target.value))}
+              onChange={(e) => { setPhone(formatPhone(e.target.value)); setPhoneVerified(false); }}
               placeholder="010-0000-0000"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
+            <div className="mt-2">
+              <PhoneVerification
+                phone={phone}
+                type="SIGNUP"
+                onVerified={() => setPhoneVerified(true)}
+                disabled={phoneVerified}
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">비밀번호</label>
@@ -260,7 +271,8 @@ export default function GuardianSignupPage() {
         {step < STEPS.length - 1 ? (
           <button
             onClick={handleNext}
-            className="flex-1 bg-primary-500 text-white font-bold py-3.5 rounded-xl text-sm hover:bg-primary-600 transition-colors"
+            disabled={step === 0 && !phoneVerified}
+            className="flex-1 bg-primary-500 text-white font-bold py-3.5 rounded-xl text-sm hover:bg-primary-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             다음
           </button>

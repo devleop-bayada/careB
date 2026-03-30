@@ -879,3 +879,24 @@ enum ClaimStatus {
   REJECTED
   PAID
 }
+
+// ─── Verification Code (전화번호 인증) ───
+
+model VerificationCode {
+  id        String           @id @default(cuid())
+  phone     String
+  code      String
+  type      VerificationType
+  expiresAt DateTime
+  verified  Boolean          @default(false)
+  attempts  Int              @default(0)
+  createdAt DateTime         @default(now())
+
+  @@index([phone, code])
+}
+
+enum VerificationType {
+  SIGNUP
+  LOGIN
+  PASSWORD_RESET
+}

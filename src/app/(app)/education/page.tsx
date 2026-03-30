@@ -3,6 +3,9 @@ import { BookOpen, Clock, Users, CheckCircle } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
 import EducationCategoryTabs from "./EducationCategoryTabs";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const CATEGORY_LABELS: Record<string, string> = {
   ALL: "전체",
@@ -30,6 +33,11 @@ export default async function EducationPage({
 }: {
   searchParams: Record<string, string>;
 }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) redirect("/login");
+  const user = session.user as any;
+  if (user.role !== "CAREGIVER") redirect("/home");
+
   const category = searchParams.category || "ALL";
   const educations = await getEducations(category);
 

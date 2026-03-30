@@ -4,6 +4,8 @@ import { useState } from "react";
 import { CheckCircle, Crown, Zap } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
 import AlertDialog from "@/components/ui/AlertDialog";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const PASS_OPTIONS = [
   {
@@ -36,6 +38,10 @@ const PASS_OPTIONS = [
 ];
 
 export default function PassPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const user = session?.user as any;
+  if (user !== undefined && user?.role !== "GUARDIAN") { router.push("/home"); return null; }
   const [selected, setSelected] = useState("30days");
   const [alertOpen, setAlertOpen] = useState(false);
 

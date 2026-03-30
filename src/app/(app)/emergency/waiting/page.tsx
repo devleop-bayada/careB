@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import BackHeader from "@/components/layout/BackHeader";
 import Button from "@/components/ui/Button";
 import { CheckCircle, Clock, XCircle, Users } from "lucide-react";
@@ -10,6 +11,9 @@ const TIMEOUT_SECONDS = 30 * 60; // 30분
 
 export default function EmergencyWaitingPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const user = session?.user as any;
+  if (user !== undefined && user?.role !== "GUARDIAN") { router.push("/home"); return null; }
   const searchParams = useSearchParams();
   const emergencyCareId = searchParams.get("id") ?? "";
   const sentCount = parseInt(searchParams.get("count") ?? "0", 10);

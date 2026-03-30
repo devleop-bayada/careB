@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   useCareRecipients,
   useCreateRecipient,
@@ -27,6 +29,10 @@ interface CareRecipientForm {
 }
 
 export default function CareRecipientsPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const user = session?.user as any;
+  if (user !== undefined && user?.role !== "GUARDIAN") { router.push("/home"); return null; }
   const { recipients, isLoading } = useCareRecipients();
   const createRecipient = useCreateRecipient();
   const updateRecipient = useUpdateRecipient();

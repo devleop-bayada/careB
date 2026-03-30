@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
 import CustomSelect from "@/components/ui/CustomSelect";
+import TimePicker from "@/components/ui/TimePicker";
 
 const ACTIVITIES = [
   { value: "meal", label: "🍚 식사" },
@@ -364,11 +365,21 @@ export default function JournalWritePage() {
         <div>
           <label className="block text-sm font-bold text-gray-900 mb-2">수면 시간</label>
           <div className="flex items-center gap-2">
-            <input type="time" value={napStart} onChange={(e) => setNapStart(e.target.value)}
-              className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
-            <span className="text-gray-400 text-sm font-medium">~</span>
-            <input type="time" value={napEnd} onChange={(e) => setNapEnd(e.target.value)}
-              className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
+            <div className="flex-1">
+              <TimePicker
+                value={napStart}
+                onChange={setNapStart}
+                placeholder="시작 시간"
+              />
+            </div>
+            <span className="text-gray-400 text-sm font-medium flex-shrink-0">~</span>
+            <div className="flex-1">
+              <TimePicker
+                value={napEnd}
+                onChange={setNapEnd}
+                placeholder="종료 시간"
+              />
+            </div>
           </div>
         </div>
 
