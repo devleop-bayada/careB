@@ -24,6 +24,7 @@ export function useChatMessages(matchId: string | undefined) {
     queryKey: ["chat", "messages", matchId],
     queryFn: () => fetchData(`/api/chat/${matchId}`),
     enabled: !!matchId,
+    refetchInterval: 3000,
   });
 
   return {

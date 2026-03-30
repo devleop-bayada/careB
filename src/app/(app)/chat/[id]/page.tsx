@@ -30,13 +30,13 @@ export default function ChatRoomPage() {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch initial messages via React Query (no polling - realtime handles updates)
+  // Fetch messages via React Query (3초 폴링으로 실시간 동기화)
   const { messages: initialMessages, isLoading } = useChatMessages(matchId);
   const [messages, setMessages] = useState<any[]>([]);
 
   // Sync React Query data into local state
   useEffect(() => {
-    if (initialMessages.length > 0) {
+    if (initialMessages) {
       setMessages(initialMessages);
     }
   }, [initialMessages]);
