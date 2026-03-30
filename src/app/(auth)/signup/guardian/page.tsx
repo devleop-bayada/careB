@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import BackHeader from "@/components/layout/BackHeader";
 import CustomSelect from "@/components/ui/CustomSelect";
 
 const STEPS = ["계정 정보", "지역 및 어르신 정보"];
@@ -121,7 +120,6 @@ export default function GuardianSignupPage() {
 
   return (
     <div className="w-full">
-      <BackHeader title="보호자 회원가입" fallbackHref="/signup" />
       <h1 className="text-xl font-bold text-gray-900 text-center mb-2">보호자 회원가입</h1>
 
       {/* Progress */}

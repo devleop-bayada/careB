@@ -22,11 +22,11 @@ export default function BackHeader({ title, fallbackHref }: BackHeaderProps) {
   }
 
   return (
-    <div className="sticky top-0 z-30 bg-white border-b border-gray-100 flex items-center h-12 px-2">
-      <button onClick={handleBack} className="p-2 -ml-1 rounded-full hover:bg-gray-100 transition-colors">
+    <div className="sticky top-0 z-30 bg-white border-b border-gray-100 flex items-center justify-center h-12 px-2 relative">
+      <button onClick={handleBack} className="absolute left-2 p-2 rounded-full hover:bg-gray-100 transition-colors">
         <ChevronLeft size={24} className="text-gray-700" />
       </button>
-      <h1 className="text-base font-bold text-gray-900 ml-1">{title}</h1>
+      <h1 className="text-base font-bold text-gray-900">{title}</h1>
     </div>
   );
 }

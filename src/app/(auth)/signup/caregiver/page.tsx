@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import BackHeader from "@/components/layout/BackHeader";
 import CustomSelect from "@/components/ui/CustomSelect";
 
 const STEPS = ["계정 정보", "요양보호사 정보"];
@@ -122,7 +121,6 @@ export default function CaregiverSignupPage() {
 
   return (
     <div className="w-full">
-      <BackHeader title="요양보호사 회원가입" fallbackHref="/signup" />
       <h1 className="text-xl font-bold text-gray-900 text-center mb-2">요양보호사 회원가입</h1>
 
       {/* Progress */}

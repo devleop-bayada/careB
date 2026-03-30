@@ -39,11 +39,7 @@ export default function LoginPage() {
 
   return (
     <div className="w-full">
-      <BackHeader title="로그인" fallbackHref="/" />
-      <div className="flex flex-col items-center mb-6">
-        <p className="text-sm text-gray-400">어르신의 내일을, 믿음으로 잇다</p>
-        <h1 className="text-xl font-bold text-gray-900 mt-1">로그인</h1>
-      </div>
+      <p className="text-center text-sm text-gray-400 mb-6">어르신의 내일을, 믿음으로 잇다</p>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">

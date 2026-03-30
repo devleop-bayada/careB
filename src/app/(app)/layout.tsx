@@ -126,6 +126,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isTabPage = TAB_PAGES.some((tab) => pathname === tab || pathname === tab + "/caregiver" || pathname === tab + "/guardian");
   const showTopHeader = isTabPage;
 
+  // 바텀바 숨김: 상세/액션 페이지에서는 바텀 네비 숨김
+  const showBottomNav = isTabPage || pathname === "/notifications";
+
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center">
       <div className="w-full max-w-[600px] relative flex flex-col min-h-screen">
@@ -152,7 +155,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Bottom Tab Navigation */}
-        <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-40 bg-white border-t border-gray-100">
+        {showBottomNav && <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-40 bg-white border-t border-gray-100">
           <div className="flex">
             {NAV_ITEMS.map((item) => {
               // 검색 탭: 역할에 따라 href 분기
@@ -176,7 +179,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               );
             })}
           </div>
-        </nav>
+        </nav>}
       </div>
     </div>
   );

@@ -56,7 +56,7 @@ export default async function CaregiverSearchPage({
             description="필터를 조정해 보세요"
           />
         ) : (
-          <div className="space-y-3">
+          <div className="bg-white divide-y divide-gray-100">
             {caregivers.map((caregiver: any) => {
               const cats: string[] = (() => {
                 try { return JSON.parse(caregiver.serviceCategories); } catch { return []; }
@@ -70,7 +70,7 @@ export default async function CaregiverSearchPage({
               };
               return (
                 <Link key={caregiver.id} href={`/caregiver/${caregiver.id}`}>
-                  <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-shadow">
+                  <div className="px-4 py-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <Avatar src={caregiver.user?.profileImage} name={caregiver.user?.name} size="lg" />
                       <div className="flex-1 min-w-0">
@@ -109,7 +109,7 @@ export default async function CaregiverSearchPage({
                       </div>
                     </div>
                     {caregiver.introduction && (
-                      <p className="text-xs text-gray-500 mt-3 line-clamp-2 border-t border-gray-50 pt-3">
+                      <p className="text-xs text-gray-500 mt-3 line-clamp-2">
                         {caregiver.introduction}
                       </p>
                     )}
