@@ -91,19 +91,15 @@ export default function LoginPage() {
         <div className="flex-1 h-px bg-gray-200" />
       </div>
 
-      {/* Social Login */}
-      <div className="space-y-3">
-        <button className="w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#3C1E1E] font-semibold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 3C7.03 3 3 6.14 3 10c0 2.54 1.64 4.78 4.13 6.07L6.2 19.3c-.07.27.22.49.47.35L10.5 17c.49.06.99.1 1.5.1 4.97 0 9-3.14 9-7s-4.03-7-9-7z" />
-          </svg>
+      {/* Social Login — OAuth 키 발급 후 주석 해제 */}
+      {/* <div className="space-y-3">
+        <button onClick={() => signIn("kakao", { callbackUrl: "/home" })} className="w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#3C1E1E] font-semibold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity">
           카카오로 로그인
         </button>
-        <button className="w-full flex items-center justify-center gap-3 bg-[#03C75A] text-white font-semibold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity">
-          <span className="font-black text-base leading-none">N</span>
+        <button onClick={() => signIn("naver", { callbackUrl: "/home" })} className="w-full flex items-center justify-center gap-3 bg-[#03C75A] text-white font-semibold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity">
           네이버로 로그인
         </button>
-      </div>
+      </div> */}
 
       <p className="text-center text-sm text-gray-500 mt-6">
         아직 회원이 아니신가요?{" "}

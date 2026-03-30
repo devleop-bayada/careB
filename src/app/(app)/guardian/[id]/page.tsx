@@ -3,8 +3,9 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { MapPin, HeartHandshake, MessageSquare } from "lucide-react";
+import { MapPin, HeartHandshake } from "lucide-react";
 import BackHeader from "@/components/layout/BackHeader";
+import MessageButton from "./MessageButton";
 
 async function getGuardian(id: string) {
   return prisma.guardianProfile.findUnique({
@@ -23,6 +24,26 @@ export default async function GuardianDetailPage({ params }: { params: { id: str
 
   const guardian = await getGuardian(params.id);
   if (!guardian) notFound();
+
+  // 현재 사용자(요양보호사)와 해당 보호자 간 기존 매칭 조회
+  let existingMatchId: string | null = null;
+  if (isCaregiver && currentUser?.id) {
+    const caregiverProfile = await prisma.caregiverProfile.findUnique({
+      where: { userId: currentUser.id },
+      select: { id: true },
+    });
+    if (caregiverProfile) {
+      const existingMatch = await prisma.match.findFirst({
+        where: {
+          guardianId: params.id,
+          caregiverId: caregiverProfile.id,
+          status: { in: ["ACCEPTED", "CONFIRMED", "IN_PROGRESS"] },
+        },
+        select: { id: true },
+      });
+      existingMatchId = existingMatch?.id ?? null;
+    }
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 pb-32">
@@ -86,13 +107,7 @@ export default async function GuardianDetailPage({ params }: { params: { id: str
       {isCaregiver && (
         <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
           <div className="flex gap-2">
-            <Link
-              href={`/matching`}
-              className="flex items-center justify-center gap-2 flex-1 py-3 border-2 border-primary-500 text-primary-500 font-bold rounded-xl text-sm hover:bg-primary-50 transition-colors"
-            >
-              <MessageSquare size={16} />
-              메시지
-            </Link>
+            <MessageButton matchId={existingMatchId} guardianId={params.id} />
             <Link
               href={`/matching/new?guardianId=${params.id}`}
               className="flex-[2] py-3 bg-primary-500 text-white font-bold rounded-xl text-sm text-center hover:bg-primary-600 transition-colors"

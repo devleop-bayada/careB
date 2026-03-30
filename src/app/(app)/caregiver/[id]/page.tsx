@@ -3,13 +3,14 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Star, MapPin, CheckCircle, MessageSquare, Heart } from "lucide-react";
+import { Star, MapPin, CheckCircle, Heart } from "lucide-react";
 import Avatar from "@/components/ui/Avatar";
 import StarRating from "@/components/ui/StarRating";
 import Badge from "@/components/ui/Badge";
 import Tag from "@/components/ui/Tag";
 import CaregiverTabs from "./CaregiverTabs";
 import BookmarkButton from "./BookmarkButton";
+import MessageButton from "./MessageButton";
 import GradeBadge from "@/components/caregiver/GradeBadge";
 import BackHeader from "@/components/layout/BackHeader";
 
@@ -39,6 +40,26 @@ export default async function CaregiverDetailPage({ params }: { params: { id: st
 
   const caregiver = await getCaregiver(params.id);
   if (!caregiver) notFound();
+
+  // 현재 사용자(보호자)와 해당 요양보호사 간 기존 매칭 조회
+  let existingMatchId: string | null = null;
+  if (isGuardian && currentUser?.id) {
+    const guardianProfile = await prisma.guardianProfile.findUnique({
+      where: { userId: currentUser.id },
+      select: { id: true },
+    });
+    if (guardianProfile) {
+      const existingMatch = await prisma.match.findFirst({
+        where: {
+          guardianId: guardianProfile.id,
+          caregiverId: params.id,
+          status: { in: ["ACCEPTED", "CONFIRMED", "IN_PROGRESS"] },
+        },
+        select: { id: true },
+      });
+      existingMatchId = existingMatch?.id ?? null;
+    }
+  }
 
   const cats: string[] = (() => {
     try { return JSON.parse(caregiver.serviceCategories); } catch { return []; }
@@ -142,13 +163,7 @@ export default async function CaregiverDetailPage({ params }: { params: { id: st
       {/* Fixed Bottom CTA */}
       <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
         <div className="flex gap-2">
-          <Link
-            href="/chat"
-            className="flex items-center justify-center gap-2 flex-1 py-3 border-2 border-primary-500 text-primary-500 font-bold rounded-xl text-sm hover:bg-primary-50 transition-colors"
-          >
-            <MessageSquare size={16} />
-            메시지
-          </Link>
+          <MessageButton matchId={existingMatchId} caregiverId={params.id} />
           {isGuardian ? (
             <Link
               href={`/matching/new?caregiverId=${params.id}`}

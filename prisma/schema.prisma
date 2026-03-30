@@ -27,6 +27,15 @@ model User {
   notifications    Notification[]
   sentMessages     InterviewMessage[]
   bookmarks        Bookmark[]
+  passes           Pass[]
+  subscriptions    Subscription[]
+  payments         Payment[]
+  notices          Notice[]           @relation("NoticeAuthor")
+  educationEnrollments EducationEnrollment[]
+  reportsMade      Report[]           @relation("Reporter")
+  reportsReceived  Report[]           @relation("ReportTarget")
+  institutionMemberships InstitutionMember[]
+  institutionStaff       InstitutionStaff[]   @relation("InstitutionCaregiver")
 
   @@index([phone])
   @@index([role])
@@ -51,6 +60,7 @@ model GuardianProfile {
   reviewsWritten    Review[]           @relation("ReviewAuthor")
   coGuardians       CoGuardian[]       @relation("CoGuardianOwner")
   coGuardianAccess  CoGuardian[]       @relation("CoGuardianMember")
+  emergencyCares    EmergencyCare[]
 
   @@index([region])
 }
@@ -120,6 +130,7 @@ model CaregiverProfile {
   reviewsReceived    Review[]          @relation("ReviewTarget")
   bookmarkedBy       Bookmark[]
   settlements        Settlement[]
+  emergencyCareMatches EmergencyCareMatch[]
 
   @@index([region])
   @@index([hourlyRate])
@@ -410,7 +421,10 @@ model Review {
   professionalism Int?
   communication   Int?
   healthCareSkill Int?
+  kindness        Int?
+  trust           Int?
   content         String
+  tags            String           @default("[]")
   images          String           @default("[]")
   isVisible       Boolean          @default(true)
   isReported      Boolean          @default(false)
@@ -521,4 +535,347 @@ model EmergencySOS {
 
   @@index([userId])
   @@index([status])
+}
+
+// ─── Emergency Care (긴급 돌봄 요청) ───
+
+model EmergencyCare {
+  id              String           @id @default(cuid())
+  guardianId      String
+  guardian        GuardianProfile  @relation(fields: [guardianId], references: [id])
+  careRecipientId String?
+  careDate        DateTime
+  startTime       String
+  durationHours   Int
+  serviceType     String           @default("HOME_CARE") // HOME_CARE, HOSPITAL_CARE, DAILY_CARE
+  address         String?
+  specialNotes    String?
+  status          String           @default("PENDING") // PENDING, MATCHED, EXPIRED, CANCELLED
+  expiresAt       DateTime
+  matchedAt       DateTime?
+  cancelledAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  matches EmergencyCareMatch[]
+
+  @@index([guardianId])
+  @@index([status])
+}
+
+model EmergencyCareMatch {
+  id               String           @id @default(cuid())
+  emergencyCareId  String
+  emergencyCare    EmergencyCare    @relation(fields: [emergencyCareId], references: [id], onDelete: Cascade)
+  caregiverId      String
+  caregiver        CaregiverProfile @relation(fields: [caregiverId], references: [id])
+  status           String           @default("SENT") // SENT, VIEWED, ACCEPTED, REJECTED
+  sentAt           DateTime         @default(now())
+  respondedAt      DateTime?
+
+  @@unique([emergencyCareId, caregiverId])
+  @@index([emergencyCareId])
+  @@index([caregiverId])
+}
+
+// ─── Pass (이용권) ───
+
+model Pass {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  type      PassType
+  total     Int       // 총 횟수
+  remaining Int       // 남은 횟수
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([type])
+}
+
+enum PassType {
+  SINGLE // 1회 이용권 3,900원
+  FIVE   // 5회 이용권 15,000원
+  TEN    // 10회 이용권 25,000원
+}
+
+// ─── Subscription (구독) ───
+
+model Subscription {
+  id        String             @id @default(cuid())
+  userId    String
+  user      User               @relation(fields: [userId], references: [id])
+  plan      SubscriptionPlan
+  status    SubscriptionStatus @default(ACTIVE)
+  startDate DateTime           @default(now())
+  endDate   DateTime
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum SubscriptionPlan {
+  STANDARD // 29,900원/월
+  PREMIUM  // 59,900원/월
+  FAMILY   // 99,900원/월
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+// ─── Payment (결제) ───
+
+model Payment {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  amount      Int
+  method      String?       // 결제 수단
+  status      PaymentStatus @default(PENDING)
+  orderId     String        @unique // 주문번호
+  paymentKey  String?       // PG 결제키
+  productType String        // PASS_SINGLE, PASS_FIVE, PASS_TEN, SUB_STANDARD, SUB_PREMIUM, SUB_FAMILY
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+// ─── Admin: Notice (공지사항) ───
+
+model Notice {
+  id          String        @id @default(cuid())
+  title       String
+  content     String        @db.Text
+  target      NoticeTarget  @default(ALL)
+  isPinned    Boolean       @default(false)
+  attachments String        @default("[]")
+  status      NoticeStatus  @default(DRAFT)
+  publishAt   DateTime?
+  expiresAt   DateTime?
+  viewCount   Int           @default(0)
+  authorId    String
+  author      User          @relation("NoticeAuthor", fields: [authorId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status])
+  @@index([target])
+  @@index([isPinned])
+}
+
+enum NoticeTarget {
+  ALL
+  GUARDIAN
+  CAREGIVER
+}
+
+enum NoticeStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  EXPIRED
+}
+
+// ─── Education (교육 콘텐츠) ───
+
+model Education {
+  id          String            @id @default(cuid())
+  title       String
+  description String            @db.Text
+  category    EducationCategory
+  duration    Int               // 분 단위
+  isRequired  Boolean           @default(false)
+  content     String            @db.Text // HTML 또는 마크다운
+  quizzes     Json?             // 퀴즈 데이터
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  enrollments EducationEnrollment[]
+}
+
+enum EducationCategory {
+  REQUIRED    // 필수 교육
+  ADVANCED    // 전문 심화
+  PRACTICAL   // 실무
+  EMOTIONAL   // 정서/소통
+}
+
+model EducationEnrollment {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  educationId  String
+  education    Education @relation(fields: [educationId], references: [id])
+  progress     Int       @default(0) // 0~100
+  isCompleted  Boolean   @default(false)
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, educationId])
+  @@index([userId])
+  @@index([educationId])
+}
+
+// ─── Report (신고/분쟁) ───
+
+model Report {
+  id          String       @id @default(cuid())
+  reporterId  String
+  reporter    User         @relation("Reporter", fields: [reporterId], references: [id])
+  targetId    String
+  target      User         @relation("ReportTarget", fields: [targetId], references: [id])
+  type        ReportType
+  reason      String
+  description String?      @db.Text
+  status      ReportStatus @default(PENDING)
+  resolution  String?      @db.Text
+  resolvedAt  DateTime?
+  resolvedBy  String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([reporterId])
+  @@index([targetId])
+  @@index([status])
+  @@index([type])
+}
+
+enum ReportType {
+  INAPPROPRIATE_BEHAVIOR
+  NO_SHOW
+  FRAUD
+  HARASSMENT
+  QUALITY_ISSUE
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  INVESTIGATING
+  RESOLVED
+  DISMISSED
+}
+
+// ─── Institution (기관) ───
+
+model Institution {
+  id                String            @id @default(cuid())
+  name              String
+  businessNumber    String            @unique // 사업자등록번호
+  ltcNumber         String?           // 장기요양기관번호
+  type              String            // 재가요양/주야간보호/방문간호 등
+  address           String
+  phone             String
+  representativeName String
+  status            InstitutionStatus @default(PENDING)
+  members           InstitutionMember[]
+  staff             InstitutionStaff[]
+  recipients        InstitutionRecipient[]
+  claims            InstitutionClaim[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([status])
+  @@index([businessNumber])
+}
+
+enum InstitutionStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+model InstitutionMember {
+  id            String      @id @default(cuid())
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  role          InstitutionRole @default(STAFF)
+  createdAt     DateTime    @default(now())
+
+  @@unique([institutionId, userId])
+  @@index([institutionId])
+  @@index([userId])
+}
+
+enum InstitutionRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+model InstitutionStaff {
+  id            String      @id @default(cuid())
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  caregiverId   String
+  caregiver     User        @relation("InstitutionCaregiver", fields: [caregiverId], references: [id])
+  status        String      @default("ACTIVE")
+  joinedAt      DateTime    @default(now())
+
+  @@unique([institutionId, caregiverId])
+  @@index([institutionId])
+  @@index([caregiverId])
+}
+
+model InstitutionRecipient {
+  id              String      @id @default(cuid())
+  institutionId   String
+  institution     Institution @relation(fields: [institutionId], references: [id])
+  name            String
+  birthDate       String
+  careLevel       String?     // 장기요양등급
+  careType        String      // 서비스 유형
+  assignedStaffId String?
+  status          String      @default("ACTIVE")
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([institutionId])
+  @@index([assignedStaffId])
+}
+
+model InstitutionClaim {
+  id            String      @id @default(cuid())
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  yearMonth     String      // "2026-03"
+  totalAmount   Int
+  status        ClaimStatus @default(DRAFT)
+  submittedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([institutionId])
+  @@index([yearMonth])
+  @@index([status])
+}
+
+enum ClaimStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWING
+  APPROVED
+  REJECTED
+  PAID
 }

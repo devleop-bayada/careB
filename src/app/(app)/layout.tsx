@@ -155,12 +155,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-40 bg-white border-t border-gray-100">
           <div className="flex">
             {NAV_ITEMS.map((item) => {
-              const active = isActive(item.href);
+              // 검색 탭: 역할에 따라 href 분기
+              const href =
+                item.href === "/search/caregiver" && isCaregiver
+                  ? "/search/guardian"
+                  : item.href;
+              const active = isActive(href);
               const label = isCaregiver ? item.caregiverLabel : item.guardianLabel;
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={href}
                   className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
                     active ? "text-primary-500" : "text-gray-400 hover:text-gray-600"
                   }`}

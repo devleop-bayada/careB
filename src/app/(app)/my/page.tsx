@@ -26,7 +26,6 @@ export default async function MyPage() {
     { href: "/care", icon: Calendar, label: "돌봄 관리" },
     { href: "/care/settlement", icon: DollarSign, label: "정산 내역" },
     { href: "/my/settings", icon: Bell, label: "알림 설정" },
-    { href: "#", icon: HelpCircle, label: "고객센터" },
   ];
 
   const sitterMenuItems = [
@@ -36,7 +35,6 @@ export default async function MyPage() {
     { href: "/care", icon: Calendar, label: "돌봄 관리" },
     { href: "/care/settlement", icon: DollarSign, label: "정산 내역" },
     { href: "/my/settings", icon: Bell, label: "알림 설정" },
-    { href: "#", icon: HelpCircle, label: "고객센터" },
   ];
 
   const menuItems = isGuardian ? parentMenuItems : sitterMenuItems;
@@ -100,10 +98,10 @@ export default async function MyPage() {
       <div className="px-4 py-6 text-center">
         <p className="text-xs text-gray-400">CareB v1.0.0</p>
         <div className="flex justify-center gap-4 mt-2">
-          <Link href="#" className="text-xs text-gray-400 hover:text-gray-600">이용약관</Link>
-          <Link href="#" className="text-xs text-gray-400 hover:text-gray-600">개인정보처리방침</Link>
+          <Link href="/terms" className="text-xs text-gray-400 hover:text-gray-600">이용약관</Link>
+          <Link href="/privacy" className="text-xs text-gray-400 hover:text-gray-600">개인정보처리방침</Link>
         </div>
-        <Link href="#" className="block mt-3 text-xs text-red-400 hover:text-red-600">회원탈퇴</Link>
+        <Link href="/my/settings" className="block mt-3 text-xs text-red-400 hover:text-red-600">회원탈퇴</Link>
       </div>
     </div>
   );

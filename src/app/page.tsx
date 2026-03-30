@@ -181,9 +181,9 @@ export default async function LandingPage() {
         <footer className="border-t border-gray-100 px-5 py-6 text-center">
           <p className="text-xs text-gray-400">© 2025 CareB. All rights reserved.</p>
           <div className="flex justify-center gap-4 mt-2">
-            <Link href="#" className="text-xs text-gray-400 hover:text-gray-600">이용약관</Link>
-            <Link href="#" className="text-xs text-gray-400 hover:text-gray-600">개인정보처리방침</Link>
-            <Link href="#" className="text-xs text-gray-400 hover:text-gray-600">고객센터</Link>
+            <Link href="/terms" className="text-xs text-gray-400 hover:text-gray-600">이용약관</Link>
+            <Link href="/privacy" className="text-xs text-gray-400 hover:text-gray-600">개인정보처리방침</Link>
+            <a href="mailto:support@bayada.kr" className="text-xs text-gray-400 hover:text-gray-600">고객센터</a>
           </div>
         </footer>
       </div>

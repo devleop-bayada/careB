@@ -53,6 +53,20 @@ export default async function CareSessionDetailPage({ params }: { params: { id: 
   const caregiverProfile = careSession.caregiver;
   const canWriteJournal = isCaregiver && careSession.status === "COMPLETED";
 
+  // 보호자이고 COMPLETED 상태일 때 리뷰 작성 여부 확인
+  const isGuardian = !isCaregiver;
+  const guardianProfile = careSession.match?.guardian;
+  let canWriteReview = false;
+  let hasWrittenReview = false;
+  if (isGuardian && careSession.status === "COMPLETED" && guardianProfile && caregiverProfile) {
+    const existingReview = await prisma.review.findUnique({
+      where: { careSessionId: params.id },
+      select: { id: true },
+    });
+    hasWrittenReview = !!existingReview;
+    canWriteReview = true;
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 pb-32">
       <BackHeader title="돌봄 상세" fallbackHref="/care" />
@@ -175,6 +189,24 @@ export default async function CareSessionDetailPage({ params }: { params: { id: 
           )}
         </div>
       </div>
+
+      {/* Review Button */}
+      {canWriteReview && (
+        <div className="px-4 pb-4">
+          {hasWrittenReview ? (
+            <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
+              <p className="text-sm font-semibold text-green-700">리뷰 작성 완료</p>
+            </div>
+          ) : (
+            <Link
+              href={`/reviews/write?careSessionId=${params.id}&caregiverId=${caregiverProfile!.id}`}
+              className="block w-full bg-primary-500 text-white text-center font-bold py-3.5 rounded-2xl text-sm hover:bg-primary-600 transition-colors"
+            >
+              리뷰 작성하기
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* SOS Button */}
       {(careSession.status === "SCHEDULED" || careSession.status === "IN_PROGRESS") && (

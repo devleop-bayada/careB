@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   Image as ImageIcon, Heart, Droplets, Thermometer,
@@ -62,6 +62,9 @@ export default function JournalWritePage() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   // Health vitals
   const [bloodPressure, setBloodPressure] = useState("");
@@ -73,6 +76,32 @@ export default function JournalWritePage() {
   const [exerciseLog, setExerciseLog] = useState("");
   const [mentalState, setMentalState] = useState("");
   const [sleepQuality, setSleepQuality] = useState("");
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+    const remaining = 5 - photos.length;
+    const toUpload = files.slice(0, remaining);
+    setUploadingPhoto(true);
+    try {
+      const uploaded: string[] = [];
+      for (const file of toUpload) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/upload", { method: "POST", body: formData });
+        if (res.ok) {
+          const data = await res.json();
+          uploaded.push(data.url ?? data.fileUrl ?? "");
+        }
+      }
+      setPhotos((prev) => [...prev, ...uploaded.filter(Boolean)]);
+    } catch {
+      // ignore
+    } finally {
+      setUploadingPhoto(false);
+      if (photoInputRef.current) photoInputRef.current.value = "";
+    }
+  }
 
   function toggleActivity(v: string) {
     setActivities((prev) => prev.includes(v) ? prev.filter((a) => a !== v) : [...prev, v]);
@@ -356,11 +385,41 @@ export default function JournalWritePage() {
 
         <div>
           <label className="block text-sm font-bold text-gray-900 mb-2">사진 첨부 (최대 5장)</label>
-          <button type="button"
-            className="flex items-center gap-2 text-sm text-gray-400 bg-gray-50 border border-dashed border-gray-200 px-4 py-3 rounded-xl w-full justify-center hover:bg-gray-100 transition-colors">
-            <ImageIcon size={18} />
-            사진 추가
-          </button>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
+          {photos.length > 0 && (
+            <div className="flex gap-2 flex-wrap mb-2">
+              {photos.map((url, i) => (
+                <div key={i} className="relative w-20 h-20">
+                  <img src={url} alt="" className="w-20 h-20 object-cover rounded-xl" />
+                  <button
+                    type="button"
+                    onClick={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-800 text-white rounded-full text-xs flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {photos.length < 5 && (
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              className="flex items-center gap-2 text-sm text-gray-400 bg-gray-50 border border-dashed border-gray-200 px-4 py-3 rounded-xl w-full justify-center hover:bg-gray-100 transition-colors disabled:opacity-60"
+            >
+              <ImageIcon size={18} />
+              {uploadingPhoto ? "업로드 중..." : "사진 추가"}
+            </button>
+          )}
         </div>
 
         <div className="pb-32">

@@ -4,11 +4,14 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { FileText, CheckCircle, Clock, PenTool } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import BackHeader from "@/components/layout/BackHeader";
 
 export default function ContractPage() {
   const params = useParams();
   const matchId = params.id as string;
+  const { data: session } = useSession();
+  const isCaregiver = (session?.user as any)?.role === "CAREGIVER";
 
   const { data: matchData } = useQuery({
     queryKey: ["match", matchId],
@@ -154,30 +157,34 @@ export default function ContractPage() {
       {!bothSigned && (
         <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-gray-100 px-4 py-3 z-30">
           <div className="flex gap-2">
-            <button
-              onClick={() => handleSign("guardian")}
-              disabled={signing || guardianSigned}
-              className={`flex-1 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
-                guardianSigned
-                  ? "bg-green-50 text-green-600 border border-green-200"
-                  : "bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-60"
-              }`}
-            >
-              <PenTool size={15} />
-              {guardianSigned ? "보호자 서명 완료" : "보호자 서명"}
-            </button>
-            <button
-              onClick={() => handleSign("caregiver")}
-              disabled={signing || caregiverSigned}
-              className={`flex-1 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
-                caregiverSigned
-                  ? "bg-green-50 text-green-600 border border-green-200"
-                  : "bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-60"
-              }`}
-            >
-              <PenTool size={15} />
-              {caregiverSigned ? "요양보호사 서명 완료" : "요양보호사 서명"}
-            </button>
+            {!isCaregiver && (
+              <button
+                onClick={() => handleSign("guardian")}
+                disabled={signing || guardianSigned}
+                className={`flex-1 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
+                  guardianSigned
+                    ? "bg-green-50 text-green-600 border border-green-200"
+                    : "bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-60"
+                }`}
+              >
+                <PenTool size={15} />
+                {guardianSigned ? "서명 완료" : "서명하기"}
+              </button>
+            )}
+            {isCaregiver && (
+              <button
+                onClick={() => handleSign("caregiver")}
+                disabled={signing || caregiverSigned}
+                className={`flex-1 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
+                  caregiverSigned
+                    ? "bg-green-50 text-green-600 border border-green-200"
+                    : "bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-60"
+                }`}
+              >
+                <PenTool size={15} />
+                {caregiverSigned ? "서명 완료" : "서명하기"}
+              </button>
+            )}
           </div>
         </div>
       )}
